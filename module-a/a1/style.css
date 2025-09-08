@@ -1,0 +1,8 @@
+img {
+    transition: ease-out, 0.5s;
+}
+
+img:hover {
+    transition: ease-out, 0.5s;
+    filter: grayscale(100%);
+}

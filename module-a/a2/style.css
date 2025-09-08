@@ -1,0 +1,28 @@
+.input-field {
+    border: 2px #D3D3D3 solid;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+.input-field:focus{
+    outline: none;
+    border: 2px #2E57FA solid; 
+}
+
+.input-label {
+    position: absolute;
+    top: 14px;
+    left: 20px;
+    font-size: 15px;
+    color: #838383;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    background-color: #ffffff;
+}
+
+.input-field:focus + .input-label,
+.input-field:not(:placeholder-shown) + .input-label {
+    top: -1px;
+    font-size: 13px;
+    color: #2E57FA;
+}
