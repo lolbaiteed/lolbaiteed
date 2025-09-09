@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module A(B3)</title>
+</head>
+<style>
+    :root{
+        font-family: sans-serif;
+    }
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .box {
+        padding: 2%;
+        width: 20em;
+        text-align: center;
+    }
+
+    input {
+        width: 95%;
+        accent-color: black;
+    }
+
+    p {
+        margin-bottom: 0;
+    }
+
+    .output-section input{
+        margin-top: 5%;
+        width: 80%;
+    }
+
+    .input-section {
+        text-align: left;
+    }
+</style>
+<body>
+    <div class="container">
+        <div class="box" id="preview">
+            <h3>Box shadow generator</h3>
+            <div class="input-section">
+                <p>X offset</p>
+                <input type="range" id="Xoff" value="0" min="-50" max="50">
+            </div>
+            <div class="input-section">
+                <p>Y offset</p>
+                <input type="range" id="Yoff" value="0" min="-50" max="50">
+            </div>
+            <div class="input-section">
+                <p>spread</p>
+                <input type="range" id="spread" value="0" min="-50" max="50">
+            </div>
+            <div class="input-section">
+                <p>Blur</p>
+                <input type="range" id="blur" value="50" min="0" max="100">
+            </div>
+            <div class="input-section">
+                <p>color</p>
+                <input type="color" id="colorPicker" value="#000000">
+            </div>
+            <div class="output-section">
+                <div id="result"></div>
+                <button id="button">Copy</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+            color = document.getElementById("colorPicker");
+            Xoffset = document.getElementById("Xoff");
+            Yoffset = document.getElementById("Yoff");
+            blurVal = document.getElementById("blur");
+            spread = document.getElementById("spread"); 
+            preview = document.getElementById("preview");
+            result = document.getElementById("result");
+            button = document.getElementById("button");
+
+            function Copy(data) {
+            //    data.select();
+            //    data.setSelectionRange(0, 99999);
+                
+               navigator.clipboard.writeText(data.textContent);
+            }
+
+            function updateBoxShadow() {
+                const boxShadow = `${Xoffset.value}px ${Yoffset.value}px ${blurVal.value}px ${spread.value}px ${color.value}`;
+                console.log(boxShadow);
+                preview.style.boxShadow = boxShadow;
+                result.textContent = `box-shadow: ${boxShadow};`;
+                [Xoffset, Yoffset, blurVal, spread].forEach(element => {
+                    element.style.accentColor = color.value;
+                });
+            }
+
+             [Xoffset, Yoffset, blurVal, spread, color].forEach(input => {
+                 input.addEventListener("input", updateBoxShadow);
+             });
+
+            button.onclick = Copy(result)
+
+            updateBoxShadow();
+    </script>
+</body>
+</html>
+
+
