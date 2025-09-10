@@ -64,8 +64,8 @@
                 <input type="color" id="colorPicker" value="#000000">
             </div>
             <div class="output-section">
-                <div id="result"></div>
-                <button id="button">Copy</button>
+                <input id="result" disabled>
+                <button type="button" id="button">Copy</button>
             </div>
         </div>
     </div>
@@ -80,18 +80,17 @@
             result = document.getElementById("result");
             button = document.getElementById("button");
 
-            function Copy(data) {
-            //    data.select();
-            //    data.setSelectionRange(0, 99999);
+            function Copy() {
+               result.select();
+               result.setSelectionRange(0, 99999);
                 
-               navigator.clipboard.writeText(data.textContent);
+               navigator.clipboard.writeText(result.value);
             }
 
             function updateBoxShadow() {
                 const boxShadow = `${Xoffset.value}px ${Yoffset.value}px ${blurVal.value}px ${spread.value}px ${color.value}`;
-                console.log(boxShadow);
                 preview.style.boxShadow = boxShadow;
-                result.textContent = `box-shadow: ${boxShadow};`;
+                result.value= `box-shadow: ${boxShadow};`;
                 [Xoffset, Yoffset, blurVal, spread].forEach(element => {
                     element.style.accentColor = color.value;
                 });
@@ -101,9 +100,9 @@
                  input.addEventListener("input", updateBoxShadow);
              });
 
-            button.onclick = Copy(result)
 
             updateBoxShadow();
+            button.addEventListener('click', Copy);
     </script>
 </body>
 </html>
