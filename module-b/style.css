@@ -1,0 +1,99 @@
+:root {
+    --background: #121212;
+    --yellow: #FCEC3E;
+    --GlowBlue: #C5D3E8;
+    --button: #4BB5F2;
+}
+
+@font-face {
+    font-family: FredokaOne;
+    src: url(fonts/FredokaOne.woff2);
+}
+
+@font-face {
+    font-family: LuckiestGuy;
+    src: url(fonts/LuckiestGuy-Regular.ttf);
+}
+
+@font-face {
+    font-family: PlusJakartaSans;
+    src: url(fonts/PlusJakartaSans-VariableFont_wght.ttf);
+}
+
+body {
+    background-color: var(--background);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+}
+
+h1 {
+    font-family: FredokaOne;
+    margin: 0;
+}
+
+.textLogo {
+    display: flex;
+    position: relative;
+    height: 10vh;
+    width: 15vh;
+}
+
+.TTLTop {
+    font-weight: 900;
+    font-size: 10vw; /* responsive font size */
+    color: #FFD700;
+    text-shadow:
+      0 0 0.5vw #FFD700,
+      0 0 1vw #FFC107,
+      0 0 1.5vw #FFA000;
+    margin: 0;
+    letter-spacing: 0.2vw;
+    transform: rotateZ(-2deg);
+    position: absolute;
+    left: 13%;
+    top: 20%;
+    z-index: -1;
+    color: var(--yellow);
+}
+
+.TTLBot {
+    position: absolute;
+    top: 7vw;    /* relative positioning */
+    left: 6vw;
+    font-weight: 700;
+    font-size: 10vw;
+    color: #7FE6FF;
+    text-shadow:
+      0 0 0.4vw #7FE6FF,
+      0 0 0.8vw #00BFFF,
+      0 0 1.2vw #00BFFF;
+    margin: 0;
+    letter-spacing: 0.1vw;
+    transform: rotateZ(2deg);
+    position: absolute;
+    font-size: x-large;
+    bottom: 21%;
+    right: 13%;
+    z-index: 0;
+    color: var(--GlowBlue);
+}
+
+button {
+    background: linear-gradient(90deg, #4bc2e0 0%, #1a71ca 100%);
+    border: none;
+    border-radius: 25px;
+    padding: 15px 60px;
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 0 12px #4bc2e0;
+    transition: background 0.3s ease;
+}
+
+button:hover {
+    background: linear-gradient(90deg, #1a71ca 0%, #4bc2e0 100%);
+}
