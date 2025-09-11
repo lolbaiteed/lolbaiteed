@@ -26,59 +26,58 @@ body {
     align-items: center;
     justify-content: center;
     height: 100vh;
-    margin: 0;
-}
-
-h1 {
-    font-family: FredokaOne;
-    margin: 0;
 }
 
 .textLogo {
-    display: flex;
     position: relative;
-    height: 10vh;
-    width: 15vh;
+    height: 20vh;
+    margin: 0;
+    padding: 0;
+    text-wrap: nowrap;
 }
 
-.TTLTop {
-    font-weight: 900;
-    font-size: 10vw; /* responsive font size */
-    color: #FFD700;
+.Top {
+    font-size: 8vw; 
     text-shadow:
       0 0 0.5vw #FFD700,
       0 0 1vw #FFC107,
       0 0 1.5vw #FFA000;
     margin: 0;
-    letter-spacing: 0.2vw;
-    transform: rotateZ(-2deg);
+    transform: rotateZ(-15deg);
     position: absolute;
-    left: 13%;
-    top: 20%;
+    right: -7vw;
     z-index: -1;
+    font-family: LuckiestGuy;
     color: var(--yellow);
 }
 
-.TTLBot {
-    position: absolute;
-    top: 7vw;    /* relative positioning */
-    left: 6vw;
-    font-weight: 700;
-    font-size: 10vw;
-    color: #7FE6FF;
+.Bot {
+    top: 6vw;    /* relative positioning */
+    left: 3vw;
+    font-weight: 100;
+    font-size: 5vw;
+    font-family: LuckiestGuy;
     text-shadow:
       0 0 0.4vw #7FE6FF,
       0 0 0.8vw #00BFFF,
       0 0 1.2vw #00BFFF;
     margin: 0;
     letter-spacing: 0.1vw;
-    transform: rotateZ(2deg);
+    transform: rotateZ(5deg);
     position: absolute;
-    font-size: x-large;
-    bottom: 21%;
-    right: 13%;
     z-index: 0;
     color: var(--GlowBlue);
+}
+
+.init {
+    transform: scale(0.1);
+    transition: transform 0.2s ease-out, opacity 0.2s;
+    opacity: 0;
+}
+
+.visible {
+    opacity: 1;
+    transform: scale(1);
 }
 
 button {
@@ -96,4 +95,20 @@ button {
 
 button:hover {
     background: linear-gradient(90deg, #1a71ca 0%, #4bc2e0 100%);
+}
+
+.container {   
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    height: 50vh;
+}
+
+
+.footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: plusJakartaSans;
+    color: white;
 }
