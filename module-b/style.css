@@ -22,11 +22,8 @@
 
 body {
     background-color: var(--background);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
 }
+
 
 .textLogo {
     position: relative;
@@ -36,42 +33,42 @@ body {
     text-wrap: nowrap;
 }
 
-.Top {
-    font-size: 8vw; 
+#Top {
+    font-size: 6em; 
     text-shadow:
       0 0 0.5vw #FFD700,
       0 0 1vw #FFC107,
       0 0 1.5vw #FFA000;
     margin: 0;
-    transform: rotateZ(-15deg);
-    position: absolute;
-    right: -7vw;
+    transform: rotateZ(-5deg);
+    text-align: left;
+    margin-right: 2vw;
     z-index: -1;
     font-family: LuckiestGuy;
     color: var(--yellow);
 }
 
-.Bot {
-    top: 6vw;    /* relative positioning */
-    left: 3vw;
-    font-weight: 100;
-    font-size: 5vw;
-    font-family: LuckiestGuy;
+#Bot {
+    top: 60px;    /* relative positioning */
+    left: 1.5em;
+    font-weight: 800;
+    font-size: 4.5em;
     text-shadow:
       0 0 0.4vw #7FE6FF,
       0 0 0.8vw #00BFFF,
       0 0 1.2vw #00BFFF;
     margin: 0;
     letter-spacing: 0.1vw;
-    transform: rotateZ(5deg);
     position: absolute;
     z-index: 0;
+    transform: rotateZ(3deg);
     color: var(--GlowBlue);
+    font-family: plusJakartaSans;
 }
 
 .init {
     transform: scale(0.1);
-    transition: transform 0.2s ease-out, opacity 0.2s;
+    transition: transform 1.5s ease-out, opacity 0.5s;
     opacity: 0;
 }
 
@@ -97,18 +94,72 @@ button:hover {
     background: linear-gradient(90deg, #1a71ca 0%, #4bc2e0 100%);
 }
 
-.container {   
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    height: 50vh;
+.main {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
+.topSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
 
 .footer {
+    margin-top: 5vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     font-family: plusJakartaSans;
     color: white;
 }
+
+/* @media (max-width: 1024px) {
+
+    #Top {
+        right: -3vw;
+    }
+
+    #Bot {
+        left: 5vw;
+    }
+}
+
+@media (max-width: 768px) {
+    #Top{
+        right: -2vw;
+        font-size: 10vw;
+    }
+
+    #Bot {
+        margin-top: 1vw;
+        left: 6vw;
+        font-size: 8vw;
+    }
+}
+
+@media (max-width: 435px) {
+    #Top {
+        font-size: 18vw;
+        right: -6vw;
+        text-shadow:
+            0 0 1.0vw #FFD700,
+            0 0 1.5vw #FFC107,
+            0 0 2vw #FFA000;
+    }
+
+    #Bot {
+        font-size: 15vw;
+        left: 12vw;
+        margin-top: 7vw;
+        text-shadow:
+            0 0 0.8vw #7FE6FF,
+            0 0 1.2vw #00BFFF,
+            0 0 1.6vw #00BFFF;
+    }
+    
+} */

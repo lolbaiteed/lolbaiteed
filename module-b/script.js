@@ -1,9 +1,39 @@
 document.addEventListener('DOMContentLoaded',() => {
     const TopEl = document.querySelectorAll('.init');
-    console.log(TopEl);
-    TopEl.forEach((TopEl, index, arr) => {
+    TopEl.forEach((TopEl, index) => {
         setTimeout(() => {
             TopEl.classList.add('visible');
-        }, index >= arr.length -2 ? (arr.length - 2) * 100 + 500 : index * 100);
+        }, index * 500);
     });
+    const BotEl = document.querySelector('.footer');
+    function delay() {
+        BotEl.classList.add('visible');
+    }
+    setTimeout(delay, 800);
 })
+
+const startButton = document.getElementById('Start');
+
+let prevAttemptDate = null;
+
+function setCookie(cname, cval, exdays) {
+    const date = new Date();
+    date.setTime(date.getTime() + (exdays * 24 * 60 * 60  * 1000));
+    let expires = "expires="+date.toUTCString();
+    document.cookie = cname + "=" + cval + ";" + expires + ";path=/";
+    console.log(document.cookie);
+}
+
+function CheckDate() {
+    if (prevAttemptDate === null) {
+        prevAttemptDate = new Date().toUTCString();
+        console.log(prevAttemptDate);
+        console.log("date set");
+    } else if (prevAttemptDate != new Date().toUTCString()){
+        console.log("OK");
+    }
+}
+
+startButton.onclick = function() {
+    CheckDate();
+}
