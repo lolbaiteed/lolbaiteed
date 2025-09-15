@@ -34,6 +34,20 @@ function CheckDate() {
     }
 }
 
-startButton.onclick = function() {
+function RunGame() {
     CheckDate();
+
+    function CreateWashingMachine(){
+        // Hide previous frame
+        const welcomeFrmae = document.getElementById("welcomeFrame");
+        welcomeFrmae.style.display = "none";
+        const washingFrame = document.getElementById("washingFrame");
+        washingFrame.style.display = "block";
+    }
+    CreateWashingMachine();
+}
+
+
+startButton.onclick = function() {
+    RunGame();
 }
