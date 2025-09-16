@@ -37,14 +37,50 @@ function CheckDate() {
 function RunGame() {
     CheckDate();
 
+  const wheel = document.getElementById("list");
+  const segments = wheel.querySelectorAll("li");
+  const totalItems = segments.length;  
+
     function CreateWashingMachine(){
         // Hide previous frame
         const welcomeFrmae = document.getElementById("welcomeFrame");
         welcomeFrmae.style.display = "none";
         const washingFrame = document.getElementById("washingFrame");
         washingFrame.style.display = "block";
+
+
+        segments.forEach((segment, index) => {
+          const angle = (360 / totalItems) * index; 
+          segment.style.transform = `rotate(${angle}deg)`;
+          segment.dataset.angle = angle;
+        });
     }
     CreateWashingMachine();
+
+    function spin() {
+      const randomAngle = Math.floor(Math.random() * 360) + 1080;
+      wheel.style.setProperty('--spin-angle', `${randomAngle}deg`);
+      wheel.style.animation = 'spin 4s ease-out forwards';
+
+      // setTimeout(() => {
+      //   wheel.style.animation = '';
+      //   const finalAngle = randomAngle % 360;
+      //   let winningSegment = null;
+      //   segments.forEach(segment => {
+      //     const segmentAngle = parseFloat(segment.dataset.angle);
+      //     const normalizedAngle = (segmentAngle + finalAngle) % 360;
+      //     if (normalizedAngle < (360 / totalItems)) {
+      //       winningSegment = segment;
+      //     };
+      //   });
+      //   alert(`${winningSegment.textContent}`);
+      // }, 4000);
+    }
+
+    const spinButton = document.getElementById("Spin");
+    spinButton.onclick = function() {
+      spin();
+    }
 }
 
 
