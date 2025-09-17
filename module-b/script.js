@@ -39,7 +39,8 @@ function RunGame() {
 
   const wheel = document.getElementById("list");
   const segments = wheel.querySelectorAll("li");
-  const totalItems = segments.length;  
+  const totalItems = segments.length; 
+  const wheelContainer = document.getElementById('wheel_container');
 
     function CreateWashingMachine(){
         // Hide previous frame
@@ -59,22 +60,25 @@ function RunGame() {
 
     function spin() {
       const randomAngle = Math.floor(Math.random() * 360) + 1080;
-      wheel.style.setProperty('--spin-angle', `${randomAngle}deg`);
-      wheel.style.animation = 'spin 4s ease-out forwards';
+      console.log(randomAngle);
+      wheelContainer.style.setProperty('--spin-angle', `${randomAngle}deg`);
+      wheelContainer.style.animation = 'spin 4s ease-out forwards';
 
-      // setTimeout(() => {
-      //   wheel.style.animation = '';
-      //   const finalAngle = randomAngle % 360;
-      //   let winningSegment = null;
-      //   segments.forEach(segment => {
-      //     const segmentAngle = parseFloat(segment.dataset.angle);
-      //     const normalizedAngle = (segmentAngle + finalAngle) % 360;
-      //     if (normalizedAngle < (360 / totalItems)) {
-      //       winningSegment = segment;
-      //     };
-      //   });
-      //   alert(`${winningSegment.textContent}`);
-      // }, 4000);
+      setTimeout(() => {
+        const finalAngle = randomAngle % 360;
+
+        if (!Number.isInteger(finalAngle)) {
+          console.log(finalAngle);
+        } 
+
+        let winningSegment = null;
+
+        const segmentIndex = Math.round(((360 - finalAngle) % 360) / 30);
+        // const cstyles = window.getComputedStyle(segments[segmentIndex]);
+        // winningSegment = cstyles.getPropertyValue("background-color");
+        winningSegment = segments[segmentIndex].textContent;
+        console.log(winningSegment);
+      }, 4000);
     }
 
     const spinButton = document.getElementById("Spin");

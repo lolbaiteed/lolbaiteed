@@ -3,8 +3,8 @@
   --yellow: #FCEC3E;
   --GlowBlue: #C5D3E8;
   --button: #4BB5F2;
+  --spin-angle: 720deg;
 }
-
 
 @font-face {
   font-family: FredokaOne;
@@ -24,7 +24,6 @@
 body {
   background-color: var(--background);
 }
-
 
 .textLogo {
   position: relative;
@@ -89,7 +88,6 @@ button {
   color: white;
   cursor: pointer;
   box-shadow: 0 0 12px #4bc2e0;
-  transition: background 0.3s ease;
 }
 
 button:hover {
@@ -194,6 +192,17 @@ button:hover {
   overflow: hidden;
 }
 
+#pointer {
+  position: absolute;
+  background-color: red;
+  top: 103px;
+  left: 98px;
+  height: 65px;
+  width: 200px;
+  z-index: 1;
+  clip-path: polygon(32% 33%, 39% 0%, 23% 0%, 31% 38%);
+}
+
 ul {
   list-style: none;
   border-radius: 50%;
@@ -206,23 +215,59 @@ li {
   left: -1%;
   bottom: -1%;
   transform-origin: 50% 50%;
-  text-align: center;
   font-size: 14px;
   font-weight: bold;
   color: white;
   line-height: 300px; /* Center text vertically */
   clip-path: polygon(50% 50%, 63% 0%, 100% 0%, 50% 50%);
   transition: transform 4s ease-out;
-  background-color: var(--button);
+  /* background-color: var(--button); */
 }
 
-li:nth-child(even) {
-  background-color: var(--yellow);
+/* li:nth-child(even) { */
+/*   background-color: var(--yellow); */
+/* } */
+
+li:nth-child(1) {
+  background-color: black; 
+}
+li:nth-child(2) {
+  background-color: yellow;
+}
+li:nth-child(3) {
+  background-color: red; 
+}
+li:nth-child(4) {
+  background-color: orange; 
+}
+li:nth-child(5) {
+  background-color: pink; 
+}
+li:nth-child(6) {
+  background-color: green; 
+}
+li:nth-child(7) {
+  background-color: purple; 
+}
+li:nth-child(8) {
+  background-color: white; 
+}
+li:nth-child(9) {
+  background-color: blue; 
+}
+li:nth-child(10) {
+  background-color: brown; 
+}
+li:nth-child(11) {
+  background-color: darkcyan; 
+}
+li:nth-child(12) {
+  background-color: darksalmon; 
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(var(--spin-angle)); }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(var(--spin-angle)); }
 }
 
 /* @media (max-width: 1024px) { */
