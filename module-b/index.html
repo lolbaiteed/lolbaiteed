@@ -1,54 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>Lucky Suds</title>
-</head>
-<body>
-    <div class="container" id="main">
-        <div id="welcomeFrame">
-            <div class="topSection">
-                <div class="textLogo">
-                    <h1 class="init" id="Top">Lucky</h1>
-                    <p class="init" id="Bot">Suds</p>
-                </div>
-            <button id="Start">Start</button>
-            </div>
-            <div class="init footer">
-                <p class="BottomInit">by</p>
-                <img src="images/sudsy-logo.svg" alt="" class="sudsyLogo BottomInit">
-            </div>
-        </div>
-        <div id="washingFrame">
-            <div id="washingMachine">
-                <div class="divider"></div>
-                <div class="selector"></div>
-                <div class="indicator"><span id="indicatorText">READY</span></div>
-                <div id="pointer"></div>
-                <div class="wheel" id="wheel_container">
-                    <ul id="list">
-                      <li>1</li>
-                      <li>2</li>
-                      <li>3</li>
-                      <li>4</li>
-                      <li>5</li>
-                      <li>6</li>
-                      <li>7</li>
-                      <li>8</li>
-                      <li>9</li>
-                      <li>10</li>
-                      <li>11</li>
-                      <li>12</li>
-                    </ul>
-                </div>
-                <div class="dividerBottom"></div>
-            </div>
 
-            <button id="Spin">SPIN</button>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Lucky Suds</title>
+</head>
+
+<body>
+  <div class="container" id="main">
+    <div id="welcomeFrame">
+      <div class="topSection">
+        <div class="textLogo">
+          <h1 class="init" id="Top">Lucky</h1>
+          <p class="init" id="Bot">Suds</p>
         </div>
+        <button id="Start">Start</button>
+      </div>
+      <div class="init" id="footer">
+        <p class="BottomInit">by</p>
+        <img src="images/sudsy-logo.svg" alt="" class="sudsyLogo BottomInit">
+      </div>
     </div>
-    <script src="script.js"></script> 
+    <div id="washingFrame">
+      <div id="washingMachine">
+        <div class="divider"></div>
+        <div class="selector"></div>
+        <div class="indicator"><span id="indicatorText">READY</span></div>
+        <div id="pointer"></div>
+        <div class="wheel" id="wheel_container">
+          <ul id="list">
+            <li>1</li>
+            <li>2</li>
+            <li>3</li>
+            <li>4</li>
+            <li>5</li>
+            <li>6</li>
+            <li>7</li>
+            <li>8</li>
+            <li>9</li>
+            <li>10</li>
+            <li>11</li>
+            <li>12</li>
+          </ul>
+        </div>
+        <div class="dividerBottom"></div>
+      </div>
+
+      <button id="Spin">SPIN</button>
+    </div>
+    <div id="resultFrame">
+      <div class="topSection">
+        <div class="textLogo">
+          <h1 class="init" id="Top">Lucky</h1>
+          <p class="init" id="Bot">Suds</p>
+        </div>
+      </div>
+      <h3 id="result"></h3>
+      <div class="resultCard">
+        
+      </div>
+    </div>
+  </div>
+  <script src="script.js"></script>
 </body>
+
 </html>

@@ -109,7 +109,7 @@ button:hover {
   justify-content: center;
 }
 
-.footer {
+#footer {
   margin-top: 5vh;
   display: flex;
   flex-direction: column;
@@ -186,7 +186,7 @@ button:hover {
   left: 10%;
   height: 220px;
   width: 220px;
-  border: 15px solid #c4c5c9;
+  border: 15px solid #80819d;
   border-radius: 50%;
   overflow: hidden;
 }
@@ -219,8 +219,8 @@ li {
   color: white;
   line-height: 300px; /* Center text vertically */
   clip-path: polygon(50% 50%, 63% 0%, 100% 0%, 50% 50%);
-  transition: transform 4s ease-out;
-  background-color: var(--button);
+  transition: transform 5s ease-out;
+  background-color: #c5c4d2;
 }
 
 li:nth-child(even) {
@@ -228,23 +228,21 @@ li:nth-child(even) {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(var(--spin-angle)); }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(var(--spin-angle)); }
 }
 
-/* @keyframes shake { */
-/*   0% { transform: translate(0px, 0px) }; */
-/*   10% { transform: translate(5px, -5px)}; */
-/*   20% { transform: translate(-5px, 5px)}; */
-/*   30% { transform: translate(5px, -5px)}; */
-/*   40% { transform: translate(-5px, 5px)}; */
-/*   50% { transform: translate(5px, -5px)}; */
-/*   60% { transform: translate(-5px, 5px)}; */
-/*   70% { transform: translate(5px, -5px)}; */
-/*   80% { transform: translate(-5px, 5px)}; */
-/*   90% { transform: translate(5px, -5px)}; */
-/*   100% { transform: translate(-5px, 5px)}; */
-/* } */
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
 
 @keyframes shake {
   0% { transform: translate(1px, 1px) rotate(0deg); }
@@ -267,48 +265,11 @@ li:nth-child(even) {
   border-radius: 35px;
 }
 
-/* @media (max-width: 1024px) { */
-/**/
-/*   #Top { */
-/*       right: -3vw; */
-/*   } */
-/**/
-/*   #Bot { */
-/*       left: 5vw; */
-/*   } */
-/* } */
-/**/
-/* @media (max-width: 768px) { */
-/*   #Top{ */
-/*       right: -2vw; */
-/*       font-size: 10vw; */
-/*   } */
-/**/
-/*   #Bot { */
-/*       margin-top: 1vw; */
-/*       left: 6vw; */
-/*       font-size: 8vw; */
-/*   } */
-/* } */
-/**/
-/* @media (max-width: 435px) { */
-/*   #Top { */
-/*       font-size: 18vw; */
-/*       right: -6vw; */
-/*       text-shadow: */
-/*           0 0 1.0vw #FFD700, */
-/*           0 0 1.5vw #FFC107, */
-/*           0 0 2vw #FFA000; */
-/*   } */
-/**/
-/*   #Bot { */
-/*       font-size: 15vw; */
-/*       left: 12vw; */
-/*       margin-top: 7vw; */
-/*       text-shadow: */
-/*           0 0 0.8vw #7FE6FF, */
-/*           0 0 1.2vw #00BFFF, */
-/*           0 0 1.6vw #00BFFF; */
-/*   } */
-/**/
-/* } */
+#resultFrame {
+  display: none;
+}
+
+#result {
+  color: white;
+  font-family: PlusJakartaSans;
+}
