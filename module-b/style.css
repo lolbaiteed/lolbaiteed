@@ -88,6 +88,7 @@ button {
   color: white;
   cursor: pointer;
   box-shadow: 0 0 12px #4bc2e0;
+  box-sizing: content-box;
 }
 
 button:hover {
@@ -217,7 +218,8 @@ li {
   font-size: 14px;
   font-weight: bold;
   color: white;
-  line-height: 300px; /* Center text vertically */
+  line-height: 300px;
+  /* Center text vertically */
   clip-path: polygon(50% 50%, 63% 0%, 100% 0%, 50% 50%);
   transition: transform 5s ease-out;
   background-color: #c5c4d2;
@@ -228,34 +230,73 @@ li:nth-child(even) {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(var(--spin-angle)); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(var(--spin-angle));
+  }
 }
 
 @keyframes blink {
   0% {
     opacity: 1;
   }
+
   50% {
     opacity: 0;
   }
+
   100% {
     opacity: 1;
   }
 }
 
 @keyframes shake {
-  0% { transform: translate(1px, 1px) rotate(0deg); }
-  10% { transform: translate(-1px, -2px) rotate(-1deg); }
-  20% { transform: translate(-3px, 0px) rotate(1deg); }
-  30% { transform: translate(3px, 2px) rotate(0deg); }
-  40% { transform: translate(1px, -1px) rotate(1deg); }
-  50% { transform: translate(-1px, 2px) rotate(-1deg); }
-  60% { transform: translate(-3px, 1px) rotate(0deg); }
-  70% { transform: translate(3px, 1px) rotate(-1deg); }
-  80% { transform: translate(-1px, -1px) rotate(1deg); }
-  90% { transform: translate(1px, 2px) rotate(0deg); }
-  100% { transform: translate(1px, -2px) rotate(-1deg); }
+  0% {
+    transform: translate(1px, 1px) rotate(0deg);
+  }
+
+  10% {
+    transform: translate(-1px, -2px) rotate(-1deg);
+  }
+
+  20% {
+    transform: translate(-3px, 0px) rotate(1deg);
+  }
+
+  30% {
+    transform: translate(3px, 2px) rotate(0deg);
+  }
+
+  40% {
+    transform: translate(1px, -1px) rotate(1deg);
+  }
+
+  50% {
+    transform: translate(-1px, 2px) rotate(-1deg);
+  }
+
+  60% {
+    transform: translate(-3px, 1px) rotate(0deg);
+  }
+
+  70% {
+    transform: translate(3px, 1px) rotate(-1deg);
+  }
+
+  80% {
+    transform: translate(-1px, -1px) rotate(1deg);
+  }
+
+  90% {
+    transform: translate(1px, 2px) rotate(0deg);
+  }
+
+  100% {
+    transform: translate(1px, -2px) rotate(-1deg);
+  }
 }
 
 #Spin {
@@ -272,4 +313,11 @@ li:nth-child(even) {
 #result {
   color: white;
   font-family: PlusJakartaSans;
+}
+
+hr {
+  width: 95%;
+  border: none;
+  background: white;
+  height: 1px;
 }

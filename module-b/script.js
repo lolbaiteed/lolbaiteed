@@ -1,9 +1,9 @@
-function animate() {
+function animate(time) {
   const TopEl = document.querySelectorAll('.init');
   TopEl.forEach((TopEl, index) => {
     setTimeout(() => {
       TopEl.classList.add('visible');
-    }, index * 500);
+    }, index * time);
     document.removeEventListener('DOMContentLoaded', self);
   });
 }
@@ -19,7 +19,7 @@ function resetAnimation() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', animate());
+document.addEventListener('DOMContentLoaded', animate(250));
 
 const startButton = document.getElementById('Start');
 
@@ -31,6 +31,22 @@ function setCookie(cname, cval, exdays) {
   let expires = "expires=" + date.toUTCString();
   document.cookie = cname + "=" + cval + ";" + expires + ";path=/";
   console.log(document.cookie);
+}
+
+function getCookie(cname) {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
 }
 
 function CheckDate() {
@@ -46,6 +62,9 @@ function CheckDate() {
 function RunGame() {
   CheckDate();
   resetAnimation();
+  let test = "test";
+  setCookie("prevAttempt", test, 1);
+  console.log(getCookie("prevAttempt"));
 
   const wheel = document.getElementById("list");
   const welcomeFrmae = document.getElementById("welcomeFrame");
@@ -83,7 +102,6 @@ function RunGame() {
   `;
 
   function CreateWashingMachine() {
-    // Hide previous frame
     welcomeFrmae.style.display = "none";
     welcomeFrmae.style.animation = "none";
     let wahsingFrameStyles = {
@@ -108,7 +126,7 @@ function RunGame() {
     const resultFrame = document.getElementById("resultFrame");
     const resultText = document.getElementById("result");
     const LogoTextTop = document.getElementById("Top");
-    const LogoTextBot= document.getElementById("Bot");
+    const LogoTextBot = document.getElementById("Bot");
 
 
     wheelContainer.style.setProperty('--spin-angle', `${randomAngle}deg`);
@@ -131,15 +149,10 @@ function RunGame() {
       winningSegment = parseFloat(segmentIndex);
       washingMachine.style.animationIterationCount = '0';
       if (Number.isInteger(parseInt(winningSegment.toFixed(0)) / 2)) {
-        let randomPrize = Math.round(Math.random() * prizes.length + 1);
-        if (randomPrize >= 6) {
-          randomPrize = 0;
-        }
         indicatorText.innerHTML = "WIN";
         indicatorText.style.animation = 'blink 0.5s';
         indicatorText.style.animationIterationCount = 'infinite'
         washingMachine.style.animation = ' ';
-        console.log(prizes[randomPrize].name);
         result = true;
       } else {
         indicatorText.innerHTML = "LOOSE";
@@ -158,26 +171,132 @@ function RunGame() {
       let resultTextTopStyles = {
         fontSize: "4em",
       }
-      
+
       let resultTextBotStyles = {
         fontSize: "3.5em",
       }
 
+      function genereateCupon() {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        for (let i = 0; i < 6; i++) {
+          result += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        return result;
+      }
+
+      function showPrize() {
+        let randomPrize = Math.round(Math.random() * prizes.length + 1);
+        if (randomPrize >= 6) {
+          randomPrize = 0;
+        }
+
+        const resultDiv = document.createElement("div");
+        const resHeader = document.createElement("h2");
+        const resDesc = document.createElement("p");
+        const divider = document.createElement("hr");
+        const logo = document.createElement("img");
+
+        logo.src = "./images/sudsy-logo.svg";
+        logo.style.width = "1px";
+
+        const cupon = document.createElement("div");
+        const cuponText = document.createElement("h2");
+        const copyButton = document.createElement("button");
+
+        copyButton.innerHTML = "Copy";
+
+        const resultDivStyles = {
+          display: "flex",
+          alignItems: "center",
+          flexDirection: "column",
+          width: "320px",
+          height: "200px",
+          backgroundColor: "var(--button)",
+        }
+
+        const resTextStyles = {
+          color: "white",
+          fontFamily: "PlusJakartaSans",
+          textAlign: "center",
+          marginBottom: "5px",
+        }
+
+        const cuponStyles = {
+          position: "relative",
+          height: "50px",
+          width: "200px",
+          backgroundColor: "#99c4ef",
+          textAlign: "center",
+        }
+
+        const cuponTextStyles = {
+          position: "absolute",
+          fontFamily: "PlusJakartaSans",
+          color: "white",
+          textAlign: "center",
+          bottom: "20%",
+          left: "5%",
+          margin: "0",
+        }
+
+        const copyButtonStyles = {
+          position: "absolute",
+          borderRadius: "0px",
+          padding: "5px 10px",
+          right: "5%",
+          top: "20%",
+          boxShadow: "none",
+          background: "white",
+          color: "black",
+          fontFamily: "PlusJakartaSans",
+          fontSize: "15px",
+        }
+
+        Object.assign(resHeader.style, resTextStyles);
+        Object.assign(resDesc.style, resTextStyles);
+        Object.assign(resultDiv.style, resultDivStyles);
+
+        cuponText.innerHTML = genereateCupon();
+
+        Object.assign(cupon.style, cuponStyles);
+        Object.assign(cuponText.style, cuponTextStyles);
+        Object.assign(copyButton.style, copyButtonStyles);
+
+        cupon.appendChild(cuponText);
+        cupon.appendChild(copyButton);
+
+        resHeader.innerHTML = prizes[randomPrize].name;
+        resDesc.innerHTML = prizes[randomPrize].description;
+
+        resultDiv.appendChild(resHeader);
+        resultDiv.appendChild(resDesc);
+        resultDiv.appendChild(cupon);
+        resultDiv.appendChild(divider);
+        resultDiv.appendChild(logo);
+        resultFrame.appendChild(resultDiv);
+      }
+
       if (result != true) {
-        washingFrame.style.display = "none";
-        resultFrame.style.display = "flex";
-        resultText.innerHTML = "You loose";
-        Object.assign(resultFrame.style, resultStyles);
-        Object.assign(LogoTextTop.style, resultTextTopStyles);
-        Object.assign(LogoTextBot.style, resultTextBotStyles);
-        animate();
+        setTimeout(() => {
+          washingFrame.style.display = "none";
+          resultFrame.style.display = "flex";
+          resultText.innerHTML = "Better luck next time!";
+          Object.assign(resultFrame.style, resultStyles);
+          Object.assign(LogoTextTop.style, resultTextTopStyles);
+          Object.assign(LogoTextBot.style, resultTextBotStyles);
+          animate(250);
+        }, 2000);
       } else {
-        washingFrame.style.display = "none";
-        resultText.innerHTML = "You win!";
-        Object.assign(resultFrame.style, resultStyles);
-        Object.assign(LogoTextTop.style, resultTextTopStyles);
-        Object.assign(LogoTextBot.style, resultTextBotStyles);
-        animate();
+        setTimeout(() => {
+          washingFrame.style.display = "none";
+          resultText.innerHTML = "You win!";
+          Object.assign(resultFrame.style, resultStyles);
+          Object.assign(LogoTextTop.style, resultTextTopStyles);
+          Object.assign(LogoTextBot.style, resultTextBotStyles);
+          showPrize();
+          animate(250);
+        }, 2000);
       }
     }, 5000);
   }
