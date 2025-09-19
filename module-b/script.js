@@ -198,7 +198,7 @@ function RunGame() {
         const logo = document.createElement("img");
 
         logo.src = "./images/sudsy-logo.svg";
-        logo.style.width = "1px";
+        logo.style.width = "80px";
 
         const cupon = document.createElement("div");
         const cuponText = document.createElement("h2");
