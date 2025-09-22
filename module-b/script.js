@@ -25,46 +25,61 @@ const startButton = document.getElementById('Start');
 
 let prevAttemptDate = null;
 
-function setCookie(cname, cval, exdays) {
-  const date = new Date();
-  date.setTime(date.getTime() + (exdays * 24 * 60 * 60 * 1000));
-  let expires = "expires=" + date.toUTCString();
-  document.cookie = cname + "=" + cval + ";" + expires + ";path=/";
-  console.log(document.cookie);
+function setCookie(cname) {
+  const now = new Date();
+  const timestamp = now.getTime();
+  const expires = new Date(timestamp + 24 * 60 * 60 * 1000);
+  document.cookie = `${cname}=${timestamp}; expires=${expires.toUTCString()}; path=/;`;
 }
 
 function getCookie(cname) {
-  let name = cname + "=";
-  let decodedCookie = decodeURIComponent(document.cookie);
-  let ca = decodedCookie.split(';');
-  for (let i = 0; i < ca.length; i++) {
-    let c = ca[i];
-    while (c.charAt(0) == ' ') {
-      c = c.substring(1);
-    }
-    if (c.indexOf(name) == 0) {
-      return c.substring(name.length, c.length);
-    }
-  }
-  return "";
+  const val = `; ${document.cookie}`;
+  const parts = val.split(`${cname}=`);
+  if (parts.length == 2) return parseInt(parts.pop().split(";").shift());
+  return null;
 }
 
-function CheckDate() {
-  if (prevAttemptDate === null) {
-    prevAttemptDate = new Date().toUTCString();
-    console.log(prevAttemptDate);
-    console.log("date set");
-  } else if (prevAttemptDate != new Date().toUTCString()) {
-    console.log("OK");
+function calcRemainingTime(cname) {
+  const timestamp = getCookie(cname);
+  if (!timestamp) return null;
+
+  const now = new Date().getTime();
+  const expiry = timestamp + 24 * 60 * 60 * 1000;
+  const remainingMs = expiry - now;
+
+  if (remainingMs <= 0) {
+    document.cookie = `${cname}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+    return null;
   }
+
+  const hours = Math.floor(remainingMs / (1000 * 60 * 60));
+  const minutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds  = Math.floor((remainingMs % (100 * 60)) / 1000);
+
+  return { hours, minutes, seconds, remainingMs };
+}
+
+function startCountDown(cname) {
+  if (!getCookie(cname)) {
+    setCookie(cname);
+  }
+
+  const interval = setInterval(() => {
+    const time = calcRemainingTime(cname);
+    if (!time) {
+      console.log("Countdown reset");
+      clearInterval(interval);
+      return;
+    }
+
+    // console.log(`Time remaining: ${time.hours}:${time.minutes}:${time.seconds}`);
+    return `${time.hours}:${time.minutes}:${time.seconds}`;
+  }, 1000);
 }
 
 function RunGame() {
-  CheckDate();
   resetAnimation();
-  let test = "test";
-  setCookie("prevAttempt", test, 1);
-  console.log(getCookie("prevAttempt"));
+
 
   const wheel = document.getElementById("list");
   const welcomeFrmae = document.getElementById("welcomeFrame");
@@ -161,6 +176,7 @@ function RunGame() {
         washingMachine.style.animation = ' ';
         result = false;
       }
+
       let resultStyles = {
         display: "flex",
         justifyContent: "center",
@@ -185,7 +201,7 @@ function RunGame() {
         return result;
       }
 
-      function showPrize() {
+      function Win() {
         let randomPrize = Math.round(Math.random() * prizes.length + 1);
         if (randomPrize >= 6) {
           randomPrize = 0;
@@ -203,6 +219,12 @@ function RunGame() {
         const cupon = document.createElement("div");
         const cuponText = document.createElement("h2");
         const copyButton = document.createElement("button");
+
+        const countdown = document.createElement("p");
+
+        let timer = startCountDown("countdown");
+
+        countdown.innerHTML = timer; 
 
         copyButton.innerHTML = "Copy";
 
@@ -274,7 +296,19 @@ function RunGame() {
         resultDiv.appendChild(cupon);
         resultDiv.appendChild(divider);
         resultDiv.appendChild(logo);
+        resultDiv.appendChild(countdown);
         resultFrame.appendChild(resultDiv);
+      }
+
+      function loose() {
+        const countdown = document.createElement("p");
+
+        const timer = startCountDown("countdown");
+
+        countdown.innerHTML = timer;
+
+        resultFrame.appendChild(countdown);
+        
       }
 
       if (result != true) {
@@ -282,9 +316,11 @@ function RunGame() {
           washingFrame.style.display = "none";
           resultFrame.style.display = "flex";
           resultText.innerHTML = "Better luck next time!";
+          
           Object.assign(resultFrame.style, resultStyles);
           Object.assign(LogoTextTop.style, resultTextTopStyles);
           Object.assign(LogoTextBot.style, resultTextBotStyles);
+          loose();
           animate(250);
         }, 2000);
       } else {
@@ -294,8 +330,9 @@ function RunGame() {
           Object.assign(resultFrame.style, resultStyles);
           Object.assign(LogoTextTop.style, resultTextTopStyles);
           Object.assign(LogoTextBot.style, resultTextBotStyles);
-          showPrize();
+          Win();
           animate(250);
+          startCountDown("countdown");
         }, 2000);
       }
     }, 5000);
