@@ -54,17 +54,29 @@ function calcRemainingTime(cname) {
 
   const hours = Math.floor(remainingMs / (1000 * 60 * 60));
   const minutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds  = Math.floor((remainingMs % (100 * 60)) / 1000);
+  const seconds = Math.floor((remainingMs % (1000 * 60)) / 1000);
 
   return { hours, minutes, seconds, remainingMs };
 }
 
-function startCountDown(cname) {
+function genereateToken() {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < 6; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+}
+
+const token = genereateToken()
+
+function startCountDown(el) {
+  let cname = token; 
   if (!getCookie(cname)) {
     setCookie(cname);
   }
 
-  const interval = setInterval(() => {
+  let timer = setInterval(() => {
     const time = calcRemainingTime(cname);
     if (!time) {
       console.log("Countdown reset");
@@ -72,14 +84,14 @@ function startCountDown(cname) {
       return;
     }
 
-    // console.log(`Time remaining: ${time.hours}:${time.minutes}:${time.seconds}`);
-    return `${time.hours}:${time.minutes}:${time.seconds}`;
+    el.innerHTML = `${time.hours}:${time.minutes}:${time.seconds}`;
   }, 1000);
+
+  return {timer, cname}
 }
 
 function RunGame() {
   resetAnimation();
-
 
   const wheel = document.getElementById("list");
   const welcomeFrmae = document.getElementById("welcomeFrame");
@@ -143,7 +155,6 @@ function RunGame() {
     const LogoTextTop = document.getElementById("Top");
     const LogoTextBot = document.getElementById("Bot");
 
-
     wheelContainer.style.setProperty('--spin-angle', `${randomAngle}deg`);
     wheelContainer.style.animation = 'spin 5s ease-in-out forwards';
     washingMachine.style.animation = 'shake 0.5s';
@@ -192,14 +203,6 @@ function RunGame() {
         fontSize: "3.5em",
       }
 
-      function genereateCupon() {
-        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        let result = '';
-        for (let i = 0; i < 6; i++) {
-          result += characters.charAt(Math.floor(Math.random() * characters.length));
-        }
-        return result;
-      }
 
       function Win() {
         let randomPrize = Math.round(Math.random() * prizes.length + 1);
@@ -221,12 +224,6 @@ function RunGame() {
         const copyButton = document.createElement("button");
 
         const countdown = document.createElement("p");
-
-        let timer = startCountDown("countdown");
-
-        countdown.innerHTML = timer; 
-
-        copyButton.innerHTML = "Copy";
 
         const resultDivStyles = {
           display: "flex",
@@ -275,15 +272,23 @@ function RunGame() {
           fontSize: "15px",
         }
 
+        const countdowsStyles = {
+          color: "white",
+        }
+
         Object.assign(resHeader.style, resTextStyles);
         Object.assign(resDesc.style, resTextStyles);
         Object.assign(resultDiv.style, resultDivStyles);
+        
 
-        cuponText.innerHTML = genereateCupon();
+        let result = startCountDown(countdown)
+        console.log(result.cname)
+        cuponText.innerHTML = result.cname 
 
         Object.assign(cupon.style, cuponStyles);
         Object.assign(cuponText.style, cuponTextStyles);
         Object.assign(copyButton.style, copyButtonStyles);
+        copyButton.innerHTML = "Copy";
 
         cupon.appendChild(cuponText);
         cupon.appendChild(copyButton);
@@ -291,24 +296,25 @@ function RunGame() {
         resHeader.innerHTML = prizes[randomPrize].name;
         resDesc.innerHTML = prizes[randomPrize].description;
 
+        Object.assign(countdown.style, countdowsStyles);
+
         resultDiv.appendChild(resHeader);
         resultDiv.appendChild(resDesc);
         resultDiv.appendChild(cupon);
         resultDiv.appendChild(divider);
         resultDiv.appendChild(logo);
-        resultDiv.appendChild(countdown);
         resultFrame.appendChild(resultDiv);
+        resultFrame.appendChild(countdown);
       }
 
       function loose() {
         const countdown = document.createElement("p");
+        const cname = genereateToken();
 
-        const timer = startCountDown("countdown");
-
-        countdown.innerHTML = timer;
-
+        startCountDown(`${cname}` ,countdown);
+        countdown.style.color = "white";
         resultFrame.appendChild(countdown);
-        
+
       }
 
       if (result != true) {
@@ -316,7 +322,7 @@ function RunGame() {
           washingFrame.style.display = "none";
           resultFrame.style.display = "flex";
           resultText.innerHTML = "Better luck next time!";
-          
+
           Object.assign(resultFrame.style, resultStyles);
           Object.assign(LogoTextTop.style, resultTextTopStyles);
           Object.assign(LogoTextBot.style, resultTextBotStyles);
@@ -332,7 +338,6 @@ function RunGame() {
           Object.assign(LogoTextBot.style, resultTextBotStyles);
           Win();
           animate(250);
-          startCountDown("countdown");
         }, 2000);
       }
     }, 5000);
