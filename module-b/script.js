@@ -19,87 +19,36 @@ function resetAnimation() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', animate(250));
-
-const startButton = document.getElementById('Start');
-
-let prevAttemptDate = null;
-
-function setCookie(cname) {
+function setCookie(cname, token, result, prize, prizeDesc) {
   const now = new Date();
   const timestamp = now.getTime();
+  const value = `${token}, + ${result}, + ${prize}, + ${prizeDesc}, + ${timestamp}`;
   const expires = new Date(timestamp + 24 * 60 * 60 * 1000);
-  document.cookie = `${cname}=${timestamp}; expires=${expires.toUTCString()}; path=/;`;
+  document.cookie = `${cname}=${value}; expires=${expires.toUTCString()}; path=/;`;
 }
 
-function getCookie(cname) {
-  const val = `; ${document.cookie}`;
-  const parts = val.split(`${cname}=`);
-  if (parts.length == 2) return parseInt(parts.pop().split(";").shift());
-  return null;
-}
+function getCookie(type) {
+  const val = `${document.cookie}`;
+  const parts = val.split(";");
 
-function calcRemainingTime(cname) {
-  const timestamp = getCookie(cname);
-  if (!timestamp) return null;
-
-  const now = new Date().getTime();
-  const expiry = timestamp + 24 * 60 * 60 * 1000;
-  const remainingMs = expiry - now;
-
-  if (remainingMs <= 0) {
-    document.cookie = `${cname}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
-    return null;
+  switch (type) {
+    case "name":
+      return parts.pop().split(', +')[0].split("=")[0];
+    case "value":
+      return parts.pop().split(', +')[1];
+    case "timestamp":
+      return parseInt(parts.pop().split(', +')[4]);
+    case "token":
+      return parts.pop().split(', +')[0].split("=")[1];
+    case "prize":
+      return parts.pop().split(', +')[2];
+    case "prizeDesc":
+      return parts.pop().split(', +')[3];
+    default: return null;
   }
-
-  const hours = Math.floor(remainingMs / (1000 * 60 * 60));
-  const minutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((remainingMs % (1000 * 60)) / 1000);
-
-  return { hours, minutes, seconds, remainingMs };
 }
 
-function genereateToken() {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < 6; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
-}
-
-const token = genereateToken()
-
-function startCountDown(el) {
-  let cname = token; 
-  if (!getCookie(cname)) {
-    setCookie(cname);
-  }
-
-  let timer = setInterval(() => {
-    const time = calcRemainingTime(cname);
-    if (!time) {
-      console.log("Countdown reset");
-      clearInterval(interval);
-      return;
-    }
-
-    el.innerHTML = `${time.hours}:${time.minutes}:${time.seconds}`;
-  }, 1000);
-
-  return {timer, cname}
-}
-
-function RunGame() {
-  resetAnimation();
-
-  const wheel = document.getElementById("list");
-  const welcomeFrmae = document.getElementById("welcomeFrame");
-  const segments = wheel.querySelectorAll("li");
-  const washingFrame = document.getElementById("washingFrame");
-  const totalItems = segments.length;
-  const wheelContainer = document.getElementById('wheel_container');
-  const prizesString = `
+const prizesString = `
     [
       {
         "name": "10% off",
@@ -127,6 +76,248 @@ function RunGame() {
       }
     ]
   `;
+const resultFrame = document.getElementById("resultFrame");
+
+const wheel = document.getElementById("list");
+const welcomeFrmae = document.getElementById("welcomeFrame");
+const segments = wheel.querySelectorAll("li");
+const washingFrame = document.getElementById("washingFrame");
+const totalItems = segments.length;
+const wheelContainer = document.getElementById('wheel_container');
+const resultText = document.getElementById("result");
+const LogoTextTop = document.getElementById("Top");
+const LogoTextBot = document.getElementById("Bot");
+const startButton = document.getElementById('Start');
+
+function Win(status) {
+  let resultStyles = {
+    display: "flex",
+    justifyContent: "center",
+    flexDirection: "column",
+    alignItems: "center",
+  }
+  welcomeFrmae.style.display = "none";
+  Object.assign(resultFrame.style, resultStyles);
+
+  const resultDiv = document.createElement("div");
+  const resHeader = document.createElement("h2");
+  const resDesc = document.createElement("p");
+  const divider = document.createElement("hr");
+  const logo = document.createElement("img");
+
+  const cupon = document.createElement("div");
+  const cuponText = document.createElement("h2");
+  const copyButton = document.createElement("button");
+
+  const countdown = document.createElement("p");
+
+  const resultDivStyles = {
+    display: "flex",
+    alignItems: "center",
+    flexDirection: "column",
+    width: "320px",
+    height: "200px",
+    backgroundColor: "var(--button)",
+  }
+
+  const resTextStyles = {
+    color: "white",
+    fontFamily: "PlusJakartaSans",
+    textAlign: "center",
+    marginBottom: "5px",
+  }
+
+  const cuponStyles = {
+    position: "relative",
+    height: "50px",
+    width: "200px",
+    backgroundColor: "#99c4ef",
+    textAlign: "center",
+  }
+
+  const cuponTextStyles = {
+    position: "absolute",
+    fontFamily: "PlusJakartaSans",
+    color: "white",
+    textAlign: "center",
+    bottom: "20%",
+    left: "5%",
+    margin: "0",
+  }
+
+  const copyButtonStyles = {
+    position: "absolute",
+    borderRadius: "0px",
+    padding: "5px 10px",
+    right: "5%",
+    top: "20%",
+    boxShadow: "none",
+    background: "white",
+    color: "black",
+    fontFamily: "PlusJakartaSans",
+    fontSize: "15px",
+  }
+
+  const countdowsStyles = {
+    color: "white",
+  }
+
+  logo.src = "./images/sudsy-logo.svg";
+  logo.style.width = "80px";
+
+  if (status === "check") {
+    cuponText.innerHTML = getCookie("token");
+    startCountDown("countdown", countdown);
+    Object.assign(resHeader.style, resTextStyles);
+    Object.assign(resDesc.style, resTextStyles);
+    Object.assign(resultDiv.style, resultDivStyles);
+
+    Object.assign(cupon.style, cuponStyles);
+    Object.assign(cuponText.style, cuponTextStyles);
+    Object.assign(copyButton.style, copyButtonStyles);
+    copyButton.innerHTML = "Copy";
+    cupon.appendChild(cuponText);
+    cupon.appendChild(copyButton);
+
+    resHeader.innerHTML = getCookie("prize");
+    resDesc.innerHTML = getCookie("prizeDesc");
+
+    Object.assign(countdown.style, countdowsStyles);
+
+    resultDiv.appendChild(resHeader);
+    resultDiv.appendChild(resDesc);
+    resultDiv.appendChild(cupon);
+    resultDiv.appendChild(divider);
+    resultDiv.appendChild(logo);
+    resultFrame.appendChild(resultDiv);
+    resultFrame.appendChild(countdown);
+  } else {
+
+    let prizes = JSON.parse(prizesString);
+
+    let randomPrize = Math.round(Math.random() * prizes.length + 1);
+    if (randomPrize >= 6) {
+      randomPrize = 0;
+    }
+
+    Object.assign(resHeader.style, resTextStyles);
+    Object.assign(resDesc.style, resTextStyles);
+    Object.assign(resultDiv.style, resultDivStyles);
+
+    cuponText.innerHTML = genereateToken();
+
+    Object.assign(cupon.style, cuponStyles);
+    Object.assign(cuponText.style, cuponTextStyles);
+    Object.assign(copyButton.style, copyButtonStyles);
+    copyButton.innerHTML = "Copy";
+
+    cupon.appendChild(cuponText);
+    cupon.appendChild(copyButton);
+
+    resHeader.innerHTML = prizes[randomPrize].name;
+    resDesc.innerHTML = prizes[randomPrize].description;
+
+    Object.assign(countdown.style, countdowsStyles);
+
+    resultDiv.appendChild(resHeader);
+    resultDiv.appendChild(resDesc);
+    resultDiv.appendChild(cupon);
+    resultDiv.appendChild(divider);
+    resultDiv.appendChild(logo);
+    resultFrame.appendChild(resultDiv);
+    resultFrame.appendChild(countdown);
+    setCookie("countdown", cuponText.textContent, true, resHeader.textContent, resDesc.textContent);
+    startCountDown("countdown", countdown);
+  }
+}
+
+function loose(status) {
+  let resultStyles = {
+    display: "flex",
+    justifyContent: "center",
+    flexDirection: "column",
+    alignItems: "center",
+  }
+  let resultTextTopStyles = {
+    fontSize: "4em",
+  }
+  let resultTextBotStyles = {
+    fontSize: "3.5em",
+  }
+  if (status === "check") {
+    const countdown = document.createElement("p");
+    welcomeFrmae.style.display = "none";
+    resultText.innerHTML = "Better luck next time!";
+
+    Object.assign(resultFrame.style, resultStyles);
+    Object.assign(LogoTextTop.style, resultTextTopStyles);
+    Object.assign(LogoTextBot.style, resultTextBotStyles);
+
+    startCountDown("countdown", countdown);
+    countdown.style.color = "white";
+    resultFrame.appendChild(countdown);
+  } else {
+    const countdown = document.createElement("p");
+    washingFrame.style.display = "none";
+    resultText.innerHTML = "Better luck next time!";
+
+    Object.assign(resultFrame.style, resultStyles);
+    Object.assign(LogoTextTop.style, resultTextTopStyles);
+    Object.assign(LogoTextBot.style, resultTextBotStyles);
+
+    startCountDown("countdown", countdown);
+    countdown.style.color = "white";
+    resultFrame.appendChild(countdown);
+    setCookie("countdown", "undefiend", false, null, null);
+  }
+}
+
+
+function calcRemainingTime(cname) {
+  const timestamp = getCookie("timestamp");
+  if (!timestamp) return null;
+
+  const now = new Date().getTime();
+  const expiry = timestamp + 24 * 60 * 60 * 1000;
+  const remainingMs = expiry - now;
+
+  if (remainingMs <= 0) {
+    document.cookie = `${cname}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+    return null;
+  }
+
+  const hours = Math.floor(remainingMs / (1000 * 60 * 60));
+  const minutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((remainingMs % (1000 * 60)) / 1000);
+  ;
+  return { hours, minutes, seconds, remainingMs };
+}
+
+function genereateToken() {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < 6; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+}
+
+function startCountDown(cname, el) {
+  let timer = setInterval(() => {
+    const time = calcRemainingTime(cname);
+    if (!time) {
+      console.log("Countdown reset");
+      clearInterval(timer);
+      return;
+    }
+    el.innerHTML = `${time.hours}:${time.minutes}:${time.seconds}`;
+  }, 1000);
+
+  return { timer, cname }
+}
+
+function RunGame() {
+  resetAnimation();
 
   function CreateWashingMachine() {
     welcomeFrmae.style.display = "none";
@@ -150,10 +341,6 @@ function RunGame() {
     const indicatorText = document.getElementById("indicatorText");
     const randomAngle = Math.ceil(Math.random() * 360) + 3600;
     const washingMachine = document.getElementById("washingMachine");
-    const resultFrame = document.getElementById("resultFrame");
-    const resultText = document.getElementById("result");
-    const LogoTextTop = document.getElementById("Top");
-    const LogoTextBot = document.getElementById("Bot");
 
     wheelContainer.style.setProperty('--spin-angle', `${randomAngle}deg`);
     wheelContainer.style.animation = 'spin 5s ease-in-out forwards';
@@ -162,7 +349,6 @@ function RunGame() {
     indicatorText.style.animationIterationCount = '0';
     indicatorText.innerHTML = "SPIN";
 
-    let prizes = JSON.parse(prizesString);
     let result = null;
 
     setTimeout(() => {
@@ -203,120 +389,6 @@ function RunGame() {
         fontSize: "3.5em",
       }
 
-
-      function Win() {
-        let randomPrize = Math.round(Math.random() * prizes.length + 1);
-        if (randomPrize >= 6) {
-          randomPrize = 0;
-        }
-
-        const resultDiv = document.createElement("div");
-        const resHeader = document.createElement("h2");
-        const resDesc = document.createElement("p");
-        const divider = document.createElement("hr");
-        const logo = document.createElement("img");
-
-        logo.src = "./images/sudsy-logo.svg";
-        logo.style.width = "80px";
-
-        const cupon = document.createElement("div");
-        const cuponText = document.createElement("h2");
-        const copyButton = document.createElement("button");
-
-        const countdown = document.createElement("p");
-
-        const resultDivStyles = {
-          display: "flex",
-          alignItems: "center",
-          flexDirection: "column",
-          width: "320px",
-          height: "200px",
-          backgroundColor: "var(--button)",
-        }
-
-        const resTextStyles = {
-          color: "white",
-          fontFamily: "PlusJakartaSans",
-          textAlign: "center",
-          marginBottom: "5px",
-        }
-
-        const cuponStyles = {
-          position: "relative",
-          height: "50px",
-          width: "200px",
-          backgroundColor: "#99c4ef",
-          textAlign: "center",
-        }
-
-        const cuponTextStyles = {
-          position: "absolute",
-          fontFamily: "PlusJakartaSans",
-          color: "white",
-          textAlign: "center",
-          bottom: "20%",
-          left: "5%",
-          margin: "0",
-        }
-
-        const copyButtonStyles = {
-          position: "absolute",
-          borderRadius: "0px",
-          padding: "5px 10px",
-          right: "5%",
-          top: "20%",
-          boxShadow: "none",
-          background: "white",
-          color: "black",
-          fontFamily: "PlusJakartaSans",
-          fontSize: "15px",
-        }
-
-        const countdowsStyles = {
-          color: "white",
-        }
-
-        Object.assign(resHeader.style, resTextStyles);
-        Object.assign(resDesc.style, resTextStyles);
-        Object.assign(resultDiv.style, resultDivStyles);
-        
-
-        let result = startCountDown(countdown)
-        console.log(result.cname)
-        cuponText.innerHTML = result.cname 
-
-        Object.assign(cupon.style, cuponStyles);
-        Object.assign(cuponText.style, cuponTextStyles);
-        Object.assign(copyButton.style, copyButtonStyles);
-        copyButton.innerHTML = "Copy";
-
-        cupon.appendChild(cuponText);
-        cupon.appendChild(copyButton);
-
-        resHeader.innerHTML = prizes[randomPrize].name;
-        resDesc.innerHTML = prizes[randomPrize].description;
-
-        Object.assign(countdown.style, countdowsStyles);
-
-        resultDiv.appendChild(resHeader);
-        resultDiv.appendChild(resDesc);
-        resultDiv.appendChild(cupon);
-        resultDiv.appendChild(divider);
-        resultDiv.appendChild(logo);
-        resultFrame.appendChild(resultDiv);
-        resultFrame.appendChild(countdown);
-      }
-
-      function loose() {
-        const countdown = document.createElement("p");
-        const cname = genereateToken();
-
-        startCountDown(`${cname}` ,countdown);
-        countdown.style.color = "white";
-        resultFrame.appendChild(countdown);
-
-      }
-
       if (result != true) {
         setTimeout(() => {
           washingFrame.style.display = "none";
@@ -354,3 +426,21 @@ function RunGame() {
 startButton.onclick = function() {
   RunGame();
 }
+
+window.addEventListener('load', () => {
+  if (getCookie("name") != null) {
+    if (getCookie("value" === true)) {
+      startButton.style.display = "none"
+      Win("check");
+      animate(250)
+      console.log("win");
+    } else {
+      startButton.style.display = "none"
+      loose("check");
+      animate(250);
+      console.log("loose")
+    }
+  } else {
+    animate(250)
+  }
+})
