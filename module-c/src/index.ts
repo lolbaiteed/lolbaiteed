@@ -1,39 +1,16 @@
 import express, {Request, Response} from 'express';
-import { z } from 'zod';
 import { PrismaClient } from '@prisma/client';
-import { randomBytes } from 'crypto';
-import { validateRegister } from './middleware/validateRegister';
+import { validateRegister } from './middleware/middleware';
 
 const app = express();
 const prisma = new PrismaClient();
 const PORT = 3000;
 
-
 app.use(express.json());
 
-const createUserSchema = z.object({
-  email: z.email({ message: "invalid email address" }),
-  name: z.string().min(1, { message: "name cannot be empty" }),
-  // passwordHash: z.string(),
-});
-
-
-function generatePasswdHash() {
-  return randomBytes(32).toString('hex');
-}
-
-// id          
-// email       
-// name        
-// passwordHash
-// credits     
-// createdAt   
-// updatedAt   
-
-app.post('/users', validateRegister, async (req: Request, res: Response) => {
+app.post('/users/register', validateRegister, async (req: Request, res: Response) => {
   try {
-    const { email, name } = req.body;
-    const passwordHash = generatePasswdHash();
+    const { email, name, password } = req.body;
     const user = await prisma.user.create({
       data: { email, name, passwordHash },
     });
