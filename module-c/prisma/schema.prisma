@@ -29,7 +29,7 @@ model UserToken {
   token     String   @id
   userId    Int
   createdAt DateTime @default(now())
-  revokedAt DateTime?
+  revokedAt DateTime? 
 
   user      User     @relation(fields: [userId], references: [id])
 }
