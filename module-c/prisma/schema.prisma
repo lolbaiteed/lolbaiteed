@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,65 +6,60 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
-model User {
-  id              Int                @id @default(autoincrement())
-  email           String             @unique
-  name            String?
-  passwordHash    String
-  credits         Int                @default(0)
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
-  tokens          UserToken[]
-  usages          MachineUsage[]
-  transactions    WalletTransaction[]
-}
 
-model UserToken {
-  token     String   @id
-  userId    Int
-  createdAt DateTime @default(now())
-  revokedAt DateTime? 
-
-  user      User     @relation(fields: [userId], references: [id])
-}
-
-model Machine {
-  id        String         @id
+model machine {
+  id        String  @id
   url       String
   name      String?
   locationX Int?
   locationY Int?
-  usages    MachineUsage[]
 }
 
-model MachineUsage {
-  id        Int               @id @default(autoincrement())
-  userId    Int
-  machineId String
-  action    MachineAction
+model machineusage {
+  id         Int                 @id @default(autoincrement())
+  userId     Int
+  machineId  String
+  action     machineusage_action
   parameters Json
-  createdAt DateTime          @default(now())
+  createdAt  DateTime            @default(now())
 
-  user     User               @relation(fields: [userId], references: [id])
-  machine  Machine            @relation(fields: [machineId], references: [id])
-  walletTx WalletTransaction[]
+  @@index([machineId], map: "MachineUsage_machineId_fkey")
+  @@index([userId], map: "MachineUsage_userId_fkey")
 }
 
-model WalletTransaction {
-  id             Int        @id @default(autoincrement())
+model user {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique(map: "User_email_key")
+  name         String?
+  passwordHash String
+  credits      Int?     @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime
+}
+
+model usertoken {
+  token     String    @id
+  userId    Int
+  createdAt DateTime  @default(now())
+  revokedAt DateTime?
+
+  @@index([userId], map: "UserToken_userId_fkey")
+}
+
+model wallettransaction {
+  id             Int      @id @default(autoincrement())
   userId         Int
   credits        Int
   machineUsageId Int?
-  createdAt      DateTime   @default(now())
+  createdAt      DateTime @default(now())
 
-  user     User            @relation(fields: [userId], references: [id])
-  usage    MachineUsage?   @relation(fields: [machineUsageId], references: [id])
+  @@index([machineUsageId], map: "WalletTransaction_machineUsageId_fkey")
+  @@index([userId], map: "WalletTransaction_userId_fkey")
 }
 
-enum MachineAction {
+enum machineusage_action {
   start
   stop
   pause
   resume
 }
-

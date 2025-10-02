@@ -1,13 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import { loginShcema, registerSchema } from '../schemas';
-import { randomBytes, scryptSync, timingSafeEqual } from 'crypto'; 
+import { randomBytes, scryptSync, timingSafeEqual } from 'crypto';
+import { PrismaClient } from '@prisma/client';
 
-// function generatePasswdHash() {
-//   return randomBytes(32).toString('hex');
-// }
-
-
-
+const prisma = new PrismaClient();
 
 export function hashPasswd(passwd: string) {
   const salt = randomBytes(16).toString('hex');
@@ -25,10 +21,9 @@ export function generateToken() {
   return randomBytes(32).toString('hex');
 }
 
-
-export function validateRegister( req: Request, res: Response, next: NextFunction) {
+export function validateRegister(req: Request, res: Response, next: NextFunction) {
   try {
-    req.body = registerSchema.parse(req.body); 
+    req.body = registerSchema.parse(req.body);
     next();
   } catch (error) {
     res.status(400).json({
@@ -38,7 +33,7 @@ export function validateRegister( req: Request, res: Response, next: NextFunctio
   }
 }
 
-export function validateLogin( req: Request, res: Response, next: NextFunction ) {
+export function validateLogin(req: Request, res: Response, next: NextFunction) {
   try {
     req.body = loginShcema.parse(req.body);
     next();
@@ -50,3 +45,26 @@ export function validateLogin( req: Request, res: Response, next: NextFunction )
   }
 }
 
+export async function checkToken(req: Request, res: Response, next: NextFunction) {
+  try {
+    const authHeader = req.headers['authorization'];
+    if (!authHeader?.startsWith("Bearer ")) {
+      throw new Error("Invalid token type")
+    } 
+    const token = authHeader.split(" ")[1];
+
+    const findToken = await prisma.usertoken.findUnique({
+      where: { token: token }
+    });
+
+    if (!findToken || findToken.revokedAt) {
+      throw new Error("Invalid or expired token")
+    }
+
+    (req as any).token = token;
+    (req as any).userId = findToken.userId;
+    next();
+  } catch (error) {
+    res.status(401).json({ message: error instanceof Error ? error.message : String(error) })
+  }
+}
