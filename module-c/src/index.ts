@@ -1,7 +1,7 @@
 import express, {Request, Response} from 'express';
 import { PrismaClient } from '@prisma/client';
-import { validateRegister, validateLogin, verifyPasswd, generateToken, hashPasswd, checkToken } from './middleware/middleware';
-import { LoginInput, RegisterInput } from 'schemas';
+import { validateRegister, validateLogin, verifyPasswd, generateToken, hashPasswd, checkToken, validateMachine } from './middleware/middleware';
+import { LoginInput, RegisterInput, addMachineSchema } from 'schemas';
 
 const app = express();
 const router = express.Router();
@@ -19,7 +19,7 @@ router.post('/users/register', validateRegister, async (req: Request, res: Respo
       data: { email, name, passwordHash, updatedAt: new Date() },
     });
     res.status(201).json({
-      status: "Registrated successfuly",
+      message: "Registrated successfuly",
       user: {
         id: user.id,
         email: user.email,
@@ -51,7 +51,7 @@ router.post('/users/login', validateLogin, async (req: Request, res: Response) =
     })
 
     res.status(200).json({
-      status: "Login successful",
+      message: "Login successful",
       user: {
         id: user.id,
         email: user.email,
@@ -72,7 +72,7 @@ router.post('/users/logout', checkToken, async (req: Request, res: Response) => 
       where: {token: token},
       data: { revokedAt: new Date() }
     })
-    res.status(200).json({ status: "Logged out successfuly" })
+    res.status(200).json({ message: "Logged out successfuly" })
   } catch (error) {
     res.status(500).json({ message: `${error}` })
   } 
@@ -134,17 +134,82 @@ router.post('/users/me/credits', checkToken, async (req: Request, res: Response)
   }
 })
 
-router.get('/machines', async (req: Request, res: Response) => {
+router.post('/machine/add', validateMachine ,async (req: Request, res: Response) => {
   try {
+    const { id, url, name, locationX, locationY } = req.body as addMachineSchema;
+    const machine = await prisma.machine.create({
+      data: { id, url, name, locationX, locationY }
+    });
+
+    res.status(201).json({
+      message: "machine created",
+      machine: {
+        id: machine.id,
+        url: machine.url,
+        name: machine.name,
+        locationX: machine.locationX,
+        locationY: machine.locationY,
+      }
+    });
     
   } catch (error) {
     res.status(500).json({ message: `${error}` })
   }
 })
 
-app.get('/', (req, res) => {
-  res.send('<h1>Testing run</h1>')
-});
+router.get('/machine/:id',checkToken, async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+    const machine = await prisma.machine.findFirst({ where: { id: id } })
+    
+    if (!machine) {
+      return res.status(404).json({ message: "Machine not found" });
+    } else if (machine.name === null) {
+      return res.status(418).json({ message: "Machine does not have name" })  
+    } else {
+
+      const machineData: string[] = machine.name.split(";");
+      
+      res.status(200).json({ 
+          id: id,
+          name: machineData[0],
+          type: machineData[1],
+          brand: machineData[2],
+          model: machineData[3]
+        })
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server error" })
+  }
+})
+
+router.post('/machine/:id/update', checkToken, async (req: Request, res: Response) => {
+  try {
+
+    const id = req.params.id;
+    const {name, locationX, locationY } = req.body as addMachineSchema;
+    const machineFound = await prisma.machine.findFirst({ where: { id: id } })
+    
+    if (!machineFound) return res.status(404).json({ message: "Machine not found" });
+
+    const updatedData = await prisma.machine.update({
+      where: { id: id },
+      data: { name: name, locationX: locationX, locationY: locationY }
+    })
+    res.status(200).json({ message: "Machine data updated successfuly", updatedData})
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server error" }) 
+  }
+})
+
+router.get('/machines', async (req: Request, res: Response) => {
+  try {
+    const machines = await prisma.machine.findMany();
+    res.status(200).json({ machines });
+  } catch (error) {
+    res.status(500).json({ message: `${error}` })
+  } 
+})
 
 app.listen(PORT, () => {
   console.log(`Server is running at localhost:${PORT}`);
