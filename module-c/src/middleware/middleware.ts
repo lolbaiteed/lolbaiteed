@@ -5,18 +5,29 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+/**
+*   @param password - password form input
+*   @retuns salt with hashed password, separated with ":" 
+*/
 export function hashPasswd(passwd: string) {
   const salt = randomBytes(16).toString('hex');
   const hash = scryptSync(passwd, salt, 64).toString('hex');
   return `${salt}:${hash}`;
 }
 
+/**
+*   @param passwd - password from input
+*   @param stored - stored password + salt from db
+*   @retunrs ture if password match, false otherwise
+*/
 export function verifyPasswd(passwd: string, stored: string) {
   const [salt, hash] = stored?.split(":");
   const newHash = scryptSync(passwd, salt, 64).toString('hex');
   return timingSafeEqual(Buffer.from(hash, "hex"), Buffer.from(newHash, "hex"));
 }
 
+/** @returns 64-character hexadecimal token
+*/
 export function generateToken() {
   return randomBytes(32).toString('hex');
 }
@@ -53,7 +64,7 @@ export async function checkToken(req: Request, res: Response, next: NextFunction
     } 
     const token = authHeader.split(" ")[1];
 
-    const findToken = await prisma.usertoken.findUnique({
+    const findToken = await prisma.userToken.findUnique({
       where: { token: token }
     });
 

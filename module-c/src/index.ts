@@ -46,7 +46,7 @@ router.post('/users/login', validateLogin, async (req: Request, res: Response) =
 
     const token = generateToken();
 
-    await prisma.usertoken.create({
+    await prisma.userToken.create({
       data: { token, userId: user.id}
     })
 
@@ -68,7 +68,7 @@ router.post('/users/login', validateLogin, async (req: Request, res: Response) =
 router.post('/users/logout', checkToken, async (req: Request, res: Response) => {
   const token = (req as any).token;
   try {
-    await prisma.usertoken.update({
+    await prisma.userToken.update({
       where: {token: token},
       data: { revokedAt: new Date() }
     })
@@ -119,7 +119,7 @@ router.post('/users/me/credits', checkToken, async (req: Request, res: Response)
       
     })
 
-    await prisma.wallettransaction.create({
+    await prisma.walletTransaction.create({
       data: {
         userId: userId,
         credits: amount,
@@ -185,7 +185,6 @@ router.get('/machine/:id',checkToken, async (req: Request, res: Response) => {
 
 router.post('/machine/:id/update', checkToken, async (req: Request, res: Response) => {
   try {
-
     const id = req.params.id;
     const {name, locationX, locationY } = req.body as addMachineSchema;
     const machineFound = await prisma.machine.findFirst({ where: { id: id } })
@@ -202,7 +201,7 @@ router.post('/machine/:id/update', checkToken, async (req: Request, res: Respons
   }
 })
 
-router.get('/machines', async (req: Request, res: Response) => {
+router.get('/machines', async (_req: Request, res: Response) => {
   try {
     const machines = await prisma.machine.findMany();
     res.status(200).json({ machines });

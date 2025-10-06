@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model machine {
+model Machine {
   id        String  @id
   url       String
   name      String?
@@ -15,11 +15,11 @@ model machine {
   locationY Int?
 }
 
-model machineusage {
+model MachineUsage {
   id         Int                 @id @default(autoincrement())
   userId     Int
   machineId  String
-  action     machineusage_action
+  action     MachineUsage_action
   parameters Json
   createdAt  DateTime            @default(now())
 
@@ -27,9 +27,9 @@ model machineusage {
   @@index([userId], map: "MachineUsage_userId_fkey")
 }
 
-model user {
+model User {
   id           Int      @id @default(autoincrement())
-  email        String   @unique(map: "User_email_key")
+  email        String   @unique
   name         String?
   passwordHash String
   credits      Int?     @default(0)
@@ -37,7 +37,7 @@ model user {
   updatedAt    DateTime
 }
 
-model usertoken {
+model UserToken {
   token     String    @id
   userId    Int
   createdAt DateTime  @default(now())
@@ -46,7 +46,7 @@ model usertoken {
   @@index([userId], map: "UserToken_userId_fkey")
 }
 
-model wallettransaction {
+model WalletTransaction {
   id             Int      @id @default(autoincrement())
   userId         Int
   credits        Int
@@ -57,7 +57,7 @@ model wallettransaction {
   @@index([userId], map: "WalletTransaction_userId_fkey")
 }
 
-enum machineusage_action {
+enum MachineUsage_action {
   start
   stop
   pause
