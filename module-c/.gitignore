@@ -4,6 +4,4 @@ node_modules
 
 /generated/prisma
 
-/prisma/migrations
-
-/backend/api/prisma/migrations
+**/migrations
