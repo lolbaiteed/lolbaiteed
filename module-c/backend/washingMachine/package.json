@@ -1,0 +1,17 @@
+{
+  "name": "washingmachine",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "me",
+  "type": "es2020",
+  "main": "machine.js",
+  "dependencies": {
+    "express": "^5.1.0",
+    "@types/express": "^5.0.3",
+    "typescript": "^5.9.2"  
+  },
+  "scripts": {
+    "build": "tsc"
+  }
+}

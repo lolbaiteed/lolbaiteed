@@ -1,0 +1,69 @@
+services:
+  db:
+    image: mysql:latest
+    container_name: db
+    environment:
+      - MYSQL_DATABASE=modulecdb
+      - MYSQL_ROOT_PASSWORD=root
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - sudsyNetwork
+
+  api:
+    build: ./backend/api/
+    container_name: api
+    env_file:
+      - ./backend/api/.env
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    command: sh -c "npx prisma migrate deploy && node dist/index.js"
+    networks:
+      - sudsyNetwork
+
+  machine1:
+    build: ./backend/washingMachine
+    environment:
+      MACHINE_NAME: machine1
+    container_name: machine1
+    networks:
+      - sudsyNetwork
+
+  machine2:
+    build: ./backend/washingMachine
+    environment:
+      MACHINE_NAME: machine2
+    container_name: machine2
+    networks:
+      - sudsyNetwork
+
+  machine3:
+    build: ./backend/washingMachine
+    environment:
+      MACHINE_NAME: machine3
+    container_name: machine3
+    networks:
+      - sudsyNetwork
+
+  machine4:
+    build: ./backend/washingMachine
+    environment:
+      MACHINE_NAME: machine4
+    container_name: machine4
+    networks:
+      - sudsyNetwork
+
+networks:
+  sudsyNetwork:
+    driver: bridge
+
+volumes:
+  db_data:
