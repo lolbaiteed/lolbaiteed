@@ -29,35 +29,51 @@ services:
     networks:
       - sudsyNetwork
 
-  machine1:
+  m001:
     build: ./backend/washingMachine
     environment:
-      MACHINE_NAME: machine1
-    container_name: machine1
+      MACHINE_ID: M001
+      MACHINE_NAME: Sudsy WM-0001 
+      MACHINE_TYPE: Washing machine
+      MACHINE_BRAND: Samsung
+      MACHINE_MODEL: WF10000
+    container_name: M001 
     networks:
       - sudsyNetwork
 
-  machine2:
+  m002:
     build: ./backend/washingMachine
     environment:
-      MACHINE_NAME: machine2
-    container_name: machine2
+      MACHINE_ID: M002
+      MACHINE_NAME: Sudsy WM-0002
+      MACHINE_TYPE: Washing machine
+      MACHINE_BRAND: Samsung
+      MACHINE_MODEL: WF10000
+    container_name: M002
     networks:
       - sudsyNetwork
 
-  machine3:
+  m003:
     build: ./backend/washingMachine
     environment:
-      MACHINE_NAME: machine3
-    container_name: machine3
+      MACHINE_ID: M003
+      MACHINE_NAME: Sudsy WM-0003
+      MACHINE_TYPE: Washing machine
+      MACHINE_BRAND: Samsung
+      MACHINE_MODEL: WF10000
+    container_name: M003 
     networks:
       - sudsyNetwork
 
-  machine4:
+  m004:
     build: ./backend/washingMachine
     environment:
-      MACHINE_NAME: machine4
-    container_name: machine4
+      MACHINE_ID: M004
+      MACHINE_NAME: Sudsy WM-0004
+      MACHINE_TYPE: Washing machine
+      MACHINE_BRAND: Samsung
+      MACHINE_MODEL: WF10000
+    container_name: M004 
     networks:
       - sudsyNetwork
 

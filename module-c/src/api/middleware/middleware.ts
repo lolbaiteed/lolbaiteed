@@ -76,11 +76,7 @@ export async function checkToken(req: Request, res: Response, next: NextFunction
     (req as any).userId = findToken.userId;
     next();
   } catch (error) {
-    if(error instanceof Error) {
-    res.status(401).json({
-      message: error.message
-    });
-    }
+    res.status(401).json({ message: error instanceof Error ? error.message : String(error) })
   }
 }
 

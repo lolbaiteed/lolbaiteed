@@ -1,13 +1,13 @@
-FROM node:20
+FROM node:latest
 
 WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install --omit=dev || true
+RUN npm install
 
 COPY . .
 
 RUN npm run build
 
-CMD ["node", "dist/machine.js"]
+CMD ["npx", "ts-node", "src/machine.ts"]

@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express, {Request, Response} from 'express';
 import { PrismaClient } from '@prisma/client';
 import { validateRegister, validateLogin, verifyPasswd, generateToken, hashPasswd, checkToken, validateMachine } from './middleware/middleware';
 import { LoginInput, RegisterInput, addMachineSchema } from 'schemas';
@@ -36,7 +36,7 @@ router.post('/users/login', validateLogin, async (req: Request, res: Response) =
   try {
     const { email, password } = req.body as LoginInput;
     const user = await prisma.user.findUnique({
-      where: { email: email }
+      where: {email: email}
     })
 
     if (!user) return res.status(401).json({ message: "Invalid email/password" });
@@ -47,7 +47,7 @@ router.post('/users/login', validateLogin, async (req: Request, res: Response) =
     const token = generateToken();
 
     await prisma.userToken.create({
-      data: { token, userId: user.id }
+      data: { token, userId: user.id}
     })
 
     res.status(200).json({
@@ -63,45 +63,40 @@ router.post('/users/login', validateLogin, async (req: Request, res: Response) =
   } catch (error) {
     res.status(500).json({ error: `Internal Server error` })
   }
-})
+}) 
 
 router.post('/users/logout', checkToken, async (req: Request, res: Response) => {
   const token = (req as any).token;
-  if(!token) throw new Error("Cannot fetch token after validate")
   try {
     await prisma.userToken.update({
-      where: { token: token },
+      where: {token: token},
       data: { revokedAt: new Date() }
     })
     res.status(200).json({ message: "Logged out successfuly" })
   } catch (error) {
-    if(error instanceof Error) {
-      res.status(500).json({
-        message: error.message
-      })
-    }
-  }
-})
+    res.status(500).json({ message: `${error}` })
+  } 
+})  
 
 router.get('/users/me', checkToken, async (req: Request, res: Response) => {
-  const userId = (req as any).userId;
+  const userId = (req as any).userId;  
   try {
     const findUser = await prisma.user.findUnique({
       where: { id: userId }
     })
 
-    if (!findUser) return res.status(400).json({ message: "user not found" })
+    if (!findUser) return res.status(400).json({ message: "user not found"})
 
     res.status(200).json({
-      message: {
+     message: {
         id: findUser.id,
         email: findUser.email,
         name: findUser.name,
         credits: findUser.credits
-      }
+     } 
     })
   } catch (error) {
-    res.status(500).json({ message: "Internal Server error" })
+    res.status(500).json({ message: "Internal Server error"})
   }
 })
 
@@ -113,15 +108,15 @@ router.post('/users/me/credits', checkToken, async (req: Request, res: Response)
       where: { id: userId }
     })
 
-    if (!findUser) return res.status(400).json({ message: "user not found" })
+    if(!findUser) return res.status(400).json({ message: "user not found" })
 
 
-    if (!Number.isFinite(amount) || amount <= 0) return res.status(400).json({ messsage: "Invalid amount" })
+    if( !Number.isFinite(amount) || amount <= 0) return res.status(400).json({ messsage: "Invalid amount" })
 
     const newCreditsAmount = await prisma.user.update({
-      where: { id: userId },
-      data: { credits: { increment: amount }, }
-
+      where: {id: userId},
+      data: { credits: { increment: amount}, }
+      
     })
 
     await prisma.walletTransaction.create({
@@ -131,15 +126,15 @@ router.post('/users/me/credits', checkToken, async (req: Request, res: Response)
         machineUsageId: null
       }
     })
-
-    res.status(200).json({ message: "Credits added successfuly", credits: newCreditsAmount.credits })
+    
+    res.status(200).json({ message: "Credits added successfuly", credits: newCreditsAmount.credits})
 
   } catch (error) {
     res.status(500).json({ message: `${error}` })
   }
 })
 
-router.post('/machine/add', validateMachine, async (req: Request, res: Response) => {
+router.post('/machine/add', validateMachine ,async (req: Request, res: Response) => {
   try {
     const { id, url, name, locationX, locationY } = req.body as addMachineSchema;
     const machine = await prisma.machine.create({
@@ -156,59 +151,54 @@ router.post('/machine/add', validateMachine, async (req: Request, res: Response)
         locationY: machine.locationY,
       }
     });
-
+    
   } catch (error) {
     res.status(500).json({ message: `${error}` })
+  }
+})
+
+router.get('/machine/:id',checkToken, async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+    const machine = await prisma.machine.findFirst({ where: { id: id } })
+    
+    if (!machine) {
+      return res.status(404).json({ message: "Machine not found" });
+    } else if (machine.name === null) {
+      return res.status(418).json({ message: "Machine does not have name" })  
+    } else {
+
+      const machineData: string[] = machine.name.split(";");
+      
+      res.status(200).json({ 
+          id: id,
+          name: machineData[0],
+          type: machineData[1],
+          brand: machineData[2],
+          model: machineData[3]
+        })
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server error" })
   }
 })
 
 router.post('/machine/:id/update', checkToken, async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
-    const { name, locationX, locationY } = req.body as addMachineSchema;
+    const {name, locationX, locationY } = req.body as addMachineSchema;
     const machineFound = await prisma.machine.findFirst({ where: { id: id } })
-
+    
     if (!machineFound) return res.status(404).json({ message: "Machine not found" });
 
     const updatedData = await prisma.machine.update({
       where: { id: id },
       data: { name: name, locationX: locationX, locationY: locationY }
     })
-    res.status(200).json({ message: "Machine data updated successfuly", updatedData })
+    res.status(200).json({ message: "Machine data updated successfuly", updatedData})
   } catch (error) {
-    res.status(500).json({ message: "Internal Server error" })
+    res.status(500).json({ message: "Internal Server error" }) 
   }
-})
-
-router.get('/machine/:id', checkToken, async (req: Request, res: Response) => {
-  const id = req.params.id;
-  const url = `http://${id}:4000/getInfo`;
-  try {
-    const resp = await fetch(url, {
-      method: "GET",
-      headers: {"Content-Type": "application/json"},
-    });
-
-    const result = await resp.json();
-
-    if(!result || result === null || result === undefined) throw new Error("Cannot fetch data from machine"); 
-
-    res.status(200).json({
-      id: result.id,
-      name: result.name,
-      type: result.type,
-      brand: result.brand,
-      model: result.model,
-    });
-    
-  } catch (error) {
-    if(error instanceof Error) {
-      res.status(500).json({
-        message: `${error}`
-      })
-    }
-  }
-
 })
 
 router.get('/machines', async (_req: Request, res: Response) => {
@@ -217,7 +207,7 @@ router.get('/machines', async (_req: Request, res: Response) => {
     res.status(200).json({ machines });
   } catch (error) {
     res.status(500).json({ message: `${error}` })
-  }
+  } 
 })
 
 app.listen(PORT, () => {

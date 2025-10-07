@@ -9,9 +9,11 @@
   "dependencies": {
     "express": "^5.1.0",
     "@types/express": "^5.0.3",
-    "typescript": "^5.9.2"  
+    "typescript": "^5.9.2",
+    "ts-node": "^10.9.2"
   },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "start": "node dist/machine.js"
   }
 }

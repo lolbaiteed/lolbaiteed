@@ -1,0 +1,58 @@
+version: '3.9'
+
+services:
+  api:
+    build: ./api
+    container_name: api
+    env_file:
+      - ./api/.env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    networks:
+      - sudsyNetwork
+  
+  db:
+    image: mysql:latest
+    container_name: db
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=modulecdb
+      - MYSQL_USER=user
+      - MYSQL_PASSORD=user
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - sudsyNetwork
+
+  machine1:
+    build: ./wahsingMachines
+    container_name: machine1
+    networks:
+      - sudsyNetwork
+
+  machine2:
+    build: ./wahsingMachines/
+    container_name: machine2
+    networks:
+      - sudsyNetwork
+
+  machine3:
+    build: ./wahsingMachines/
+    container_name: machine3
+    networks:
+      - sudsyNetwork
+
+  machine4:
+    build: ./wahsingMachines/
+    container_name: machine4
+    networks:
+      - sudsyNetwork
+
+networks:
+  sudsyNetwork:
+    driver: bridge
+
+volumes:
+  db_data:
