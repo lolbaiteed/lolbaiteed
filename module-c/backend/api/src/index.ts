@@ -194,11 +194,7 @@ router.get('/machine/:id', checkToken, async (req: Request, res: Response) => {
     if(!result || result === null || result === undefined) throw new Error("Cannot fetch data from machine"); 
 
     res.status(200).json({
-      id: result.id,
-      name: result.name,
-      type: result.type,
-      brand: result.brand,
-      model: result.model,
+      result
     });
     
   } catch (error) {
