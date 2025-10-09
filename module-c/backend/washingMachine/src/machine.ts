@@ -1,5 +1,6 @@
-import express, {Response} from 'express'
-import { getAvailabeProgram } from './utils';
+import express, {Response, Request} from 'express'
+import { getAvailabeProgram, getCurrentProgram, getStatus, setPorgram, setStatus, Status } from './utils';
+import { ProgramRequest } from 'types';
 
 const app = express();
 app.use(express.json());
@@ -21,7 +22,9 @@ app.listen(4000, () => {
 
 app.get("/getInfo", (_req, res: Response) => {
   try {
-    const program = getAvailabeProgram();
+    const availableProgram = getAvailabeProgram();
+    const currentProgram = getCurrentProgram();
+    const opStatus = getStatus();
     res.status(200).json({
       name: process.env.MACHINE_NAME, 
       type: process.env.MACHINE_TYPE,
@@ -29,12 +32,16 @@ app.get("/getInfo", (_req, res: Response) => {
       model: process.env.MACHINE_MODEL,
       availablePrograms: [
         {
-          name: program.name,
-          temperature: program.temperature,
-          spinSpeed: program.spinSpeed,
-          duration: program.duration
+          name: availableProgram.name,
+          temperature: availableProgram.temperature,
+          spinSpeed: availableProgram.spinSpeed,
+          duration: availableProgram.duration
         }
       ],
+      status: {
+        operationalStatus: opStatus,
+        currentProgram: currentProgram 
+      }
     })
   } catch (error) {
     if(error instanceof Error) {
@@ -43,6 +50,33 @@ app.get("/getInfo", (_req, res: Response) => {
         stackTrace: error.stack
       })
       console.log({error});
+    }
+  }
+})
+
+app.post("/control/start", (req: Request, res: Response) => {
+  const data = req.body as ProgramRequest;
+  try {  
+    setStatus(Status.Operational);
+    setPorgram(data.parameters.temperature, data.parameters.spinSpeed);
+    const program = getCurrentProgram();
+    res.status(200).json({
+      message: "Machine started succesfully",
+      machineId: process.env.MACHINE_ID,
+      porgramName: data.name, 
+      parameters: {
+        temperature: program?.temperature,
+        spinSpeed: program?.spinSpeed,
+        duration: program?.duration
+      }
+    })
+  } catch (error) {
+    if(error instanceof Error) {
+      res.status(400).json({
+        name: error.name,
+        message: error.message,
+        stackTrace: error.stack
+      })
     }
   }
 })

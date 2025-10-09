@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { validateRegister, validateLogin, verifyPasswd, generateToken, hashPasswd, checkToken, validateMachine } from './middleware/middleware';
-import { LoginInput, RegisterInput, addMachineSchema } from 'schemas';
+import { LoginInput, RegisterInput, addMachineSchema, setProgramInput } from 'schemas';
 
 const app = express();
 const router = express.Router();
@@ -213,6 +213,31 @@ router.get('/machines', async (_req: Request, res: Response) => {
     res.status(200).json({ machines });
   } catch (error) {
     res.status(500).json({ message: `${error}` })
+  }
+})
+
+router.post('/machine/:id/start', async(req: Request, res: Response) => {
+  const id = req.params.id;
+  const data = req.body as setProgramInput; 
+  const url = `http://${id}:4000/control/start`
+  try {
+    const resp = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    })
+
+    const result = await resp.json();
+    res.status(200).json({
+      result,
+    })
+  } catch (error) {
+    if(error instanceof Error) {
+      res.status(500).json({
+        message: error.message,
+        stackTrace: error.stack
+      })
+    }
   }
 })
 

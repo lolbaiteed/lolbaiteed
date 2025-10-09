@@ -19,6 +19,15 @@ export const addMachineSchema = z.object({
   locationY: z.int()
 })
 
+export const setProgramSchema = z.object({
+  name: z.string(),
+  parameters: z.object({
+    temperature: z.number(),
+    spinSpeed: z.number()
+  })
+})
+
 export type addMachineSchema = z.infer<typeof addMachineSchema>
 export type LoginInput = z.infer<typeof loginShcema>
 export type RegisterInput = z.infer<typeof registerSchema>
+export type setProgramInput = z.infer<typeof setProgramSchema>
