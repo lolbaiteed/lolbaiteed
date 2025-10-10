@@ -1,5 +1,5 @@
 import express, {Response, Request} from 'express'
-import { getAvailabeProgram, getCurrentProgram, getStatus, setPorgram, setStatus, Status } from './utils';
+import { getAvailabeProgram, getCurrentProgram, getStatus, setPorgram } from './utils';
 import { ProgramRequest } from 'types';
 
 const app = express();
@@ -15,10 +15,6 @@ app.post("/task", (req, res) => {
 
   res.json({ status: "accepted", machine: process.env.MACHINE_NAME });
 })
-
-app.listen(4000, () => {
-  console.log(`Machine ${process.env.MACHINE_NAME} ready on port 4000 (internal network)`)
-});
 
 app.get("/getInfo", (_req, res: Response) => {
   try {
@@ -56,9 +52,10 @@ app.get("/getInfo", (_req, res: Response) => {
 
 app.post("/control/start", (req: Request, res: Response) => {
   const data = req.body as ProgramRequest;
+  const authHeader = req.headers["authorization"];
+  const token = authHeader?.split(" ")[1];
   try {  
-    setStatus(Status.Operational);
-    setPorgram(data.parameters.temperature, data.parameters.spinSpeed);
+    setPorgram(data.parameters.temperature, data.parameters.spinSpeed, token);
     const program = getCurrentProgram();
     res.status(200).json({
       message: "Machine started succesfully",
@@ -80,3 +77,7 @@ app.post("/control/start", (req: Request, res: Response) => {
     }
   }
 })
+
+app.listen(4000, () => {
+  console.log(`Machine ${process.env.MACHINE_NAME} ready on port 4000 (internal network)`)
+});

@@ -5,3 +5,8 @@ export type ProgramRequest = {
     spinSpeed: number;
   };
 };
+
+export type WalletTransaction = {
+  machineId: string | undefined;
+  credits: number;
+}

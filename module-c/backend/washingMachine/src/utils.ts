@@ -1,3 +1,5 @@
+import { WalletTransaction } from "types";
+
 export function getAvailabeProgram() {
   const temperature = [30, 40, 50];
   const spinSpeed = [800, 1200, 1600];
@@ -34,12 +36,6 @@ function canTransition(from: Status, to: Status): boolean {
   }
 }
 
-export function assertTransition(from: Status, to: Status): void {
-  if (!canTransition(from, to)) {
-    throw new Error(`Invalid state transition: ${from} -> ${to}`);
-  }
-} 
-  
 export function setStatus(newStatus: Status): void {
   if (canTransition(currentStatus, newStatus)) {
     console.log(`Status changed from ${currentStatus} to ${newStatus}`);
@@ -57,7 +53,41 @@ export function getCurrentProgram(): Program | null {
   return currentProgram;
 }
 
-export function setPorgram(temperature: number, spinSpeed: number ): void {
+function isBusy(): boolean {
+  if(currentProgram != null) {
+    return true;
+  }
+  return false;
+}
+
+export function clcCost(duration: number) {
+  let cost = (duration / 3600) * 10 + 5;
+  return cost;
+}
+
+async function walletTransaction(token: any) {
+  const data: WalletTransaction = {
+    machineId: process.env.MACHINE_ID,
+    credits: clcCost(3600)
+  }
+  const url = "http://api:3000/api/v1/users/me/credits"
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: { 
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify(data) 
+  })
+  
+  const result = await resp.json();
+
+  if(!resp.ok) throw new Error("Transaction failed")
+
+  return result; 
+}
+
+export function setPorgram(temperature: number, spinSpeed: number, token: any): void {
   const available = getAvailabeProgram();
 
   const tempCopy = [...available.temperature];
@@ -76,6 +106,14 @@ export function setPorgram(temperature: number, spinSpeed: number ): void {
     temperature: [temperature],
     spinSpeed: [spinSpeed],
   }
+
+  if(isBusy()) {
+    throw new Error("Machine is busy, wait to previous program end");
+  }
+
+  walletTransaction(token)
+
+  setStatus(Status.Operational);
 
   currentProgram = newProgram;
 

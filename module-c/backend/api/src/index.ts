@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { validateRegister, validateLogin, verifyPasswd, generateToken, hashPasswd, checkToken, validateMachine } from './middleware/middleware';
 import { LoginInput, RegisterInput, addMachineSchema, setProgramInput } from 'schemas';
+import { tr } from 'zod/locales';
 
 const app = express();
 const router = express.Router();
@@ -108,6 +109,8 @@ router.get('/users/me', checkToken, async (req: Request, res: Response) => {
 router.post('/users/me/credits', checkToken, async (req: Request, res: Response) => {
   const userId = (req as any).userId;
   const amount = Number(req.body.amount);
+  const machineUsageId = req.body.machineUsageId || null;
+
   try {
     const findUser = await prisma.user.findUnique({
       where: { id: userId }
@@ -115,30 +118,52 @@ router.post('/users/me/credits', checkToken, async (req: Request, res: Response)
 
     if (!findUser) return res.status(400).json({ message: "user not found" })
 
+    if(machineUsageId === null){
+      if (!Number.isFinite(amount) || amount <= 0) return res.status(400).json({ messsage: "Invalid amount" })
 
-    if (!Number.isFinite(amount) || amount <= 0) return res.status(400).json({ messsage: "Invalid amount" })
+      const newCreditsAmount = await prisma.user.update({
+        where: { id: userId },
+        data: { credits: { increment: amount }, }
+      })
 
-    const newCreditsAmount = await prisma.user.update({
-      where: { id: userId },
-      data: { credits: { increment: amount }, }
+      await prisma.walletTransaction.create({
+        data: {
+          userId: userId,
+          credits: amount,
+          machineUsageId: machineUsageId 
+        }
+      })
 
-    })
+      res.status(200).json({ message: "Credits added successfuly", credits: newCreditsAmount.credits })
+    } else {
 
-    await prisma.walletTransaction.create({
-      data: {
-        userId: userId,
-        credits: amount,
-        machineUsageId: null
-      }
-    })
+      const userCurrentCredits = findUser.credits;
+      if(userCurrentCredits === null || userCurrentCredits < amount) return res.status(400).json({ message: "You don't have enough credits for that operation" }) 
 
-    res.status(200).json({ message: "Credits added successfuly", credits: newCreditsAmount.credits })
+      const newCreditsAmount = await prisma.user.update({
+        where: { id: userId },
+        data: { credits: { decrement: amount }, }
+      })
+
+      await prisma.walletTransaction.create({
+        data: {
+          userId: userId,
+          credits: amount,
+          machineUsageId: machineUsageId 
+        }
+      })
+
+      res.status(200).json({
+        message: "Transaction successful",
+        credits: newCreditsAmount.credits
+      })
+    }
 
   } catch (error) {
     res.status(500).json({ message: `${error}` })
   }
 })
-
+           
 router.post('/machine/add', validateMachine, async (req: Request, res: Response) => {
   try {
     const { id, url, name, locationX, locationY } = req.body as addMachineSchema;
@@ -216,21 +241,27 @@ router.get('/machines', async (_req: Request, res: Response) => {
   }
 })
 
-router.post('/machine/:id/start', async(req: Request, res: Response) => {
+router.post('/machine/:id/start', checkToken, async(req: Request, res: Response) => {
   const id = req.params.id;
   const data = req.body as setProgramInput; 
   const url = `http://${id}:4000/control/start`
   try {
     const resp = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${(req as any).token}`
+      },
       body: JSON.stringify(data)
     })
-
     const result = await resp.json();
+    
+    if(!resp.ok) throw new Error("You don't have enough credits")
+
     res.status(200).json({
       result,
     })
+
   } catch (error) {
     if(error instanceof Error) {
       res.status(500).json({
