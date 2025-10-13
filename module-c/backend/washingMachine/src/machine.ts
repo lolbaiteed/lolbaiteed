@@ -1,20 +1,11 @@
 import express, {Response, Request} from 'express'
-import { getAvailabeProgram, getCurrentProgram, getStatus, setPorgram } from './utils';
+import { getAvailabeProgram, getCurrentProgram, getStatus, pauseProgram, resumeProgram, setPorgram, stopProgram } from './utils';
 import { ProgramRequest } from 'types';
+import { checkOwner, setOwner } from 'middleware';
+
 
 const app = express();
 app.use(express.json());
-
-app.post("/task", (req, res) => {
-  const { jobId, payload } = req.body;
-  console.log(`[${process.env.MACHINE_NAME}] Recived job ${jobId}`, payload);
-
-  setTimeout(() => {
-    console.log(`[${process.env.MACHINE_NAME}] Finished job ${jobId}`);
-  }, 2000);
-
-  res.json({ status: "accepted", machine: process.env.MACHINE_NAME });
-})
 
 app.get("/getInfo", (_req, res: Response) => {
   try {
@@ -50,13 +41,11 @@ app.get("/getInfo", (_req, res: Response) => {
   }
 })
 
-app.post("/control/start", (req: Request, res: Response) => {
+app.post("/control/start", setOwner ,async (req: Request, res: Response) => {
   const data = req.body as ProgramRequest;
-  const authHeader = req.headers["authorization"];
-  const token = authHeader?.split(" ")[1];
+  const token = (req as any).token; 
   try {  
-    setPorgram(data.parameters.temperature, data.parameters.spinSpeed, token);
-    const program = getCurrentProgram();
+    let program = await setPorgram(data.parameters.temperature, data.parameters.spinSpeed, token);
     res.status(200).json({
       message: "Machine started succesfully",
       machineId: process.env.MACHINE_ID,
@@ -65,14 +54,71 @@ app.post("/control/start", (req: Request, res: Response) => {
         temperature: program?.temperature,
         spinSpeed: program?.spinSpeed,
         duration: program?.duration
-      }
+      },
+      creditsDeducted: program?.creditsDeducted,
+      remainingCredits: program?.remainingCredits
+    })
+  } catch (error) {
+    if(error instanceof Error) {
+      res.status(500).json({
+        name: error.name,
+        message: error.message,
+        stackTrace: error.stack
+      }) 
+    } else if (error instanceof TypeError) {
+      res.status(400).json({
+        name: error.name,
+        message: error.message
+      }) 
+    } else if (error instanceof WebTransportError) {
+      res.status(404).json({
+        name: error.name,
+        message: error.message
+      })
+    }
+  }
+})
+
+app.post("/control/stop", checkOwner, async (_req: Request, res: Response) => {
+  try {
+    stopProgram();
+    res.status(200).json({
+      message: "Mahcine stopped succesfully"
     })
   } catch (error) {
     if(error instanceof Error) {
       res.status(400).json({
-        name: error.name,
-        message: error.message,
-        stackTrace: error.stack
+        message: error.message
+      })
+    }
+  }
+})
+
+app.post("/control/pause", async (_req: Request, res: Response) => {
+  try {
+    pauseProgram()
+    res.status(200).json({
+      message: "Program paused succesfully"
+    })
+  } catch (error) {
+    if(error instanceof Error) {
+      res.status(400).json({
+        message: error.message
+      })
+    }
+  }
+})
+
+app.post("/control/resume", async (_req: Request, res: Response) => {
+  try {
+    resumeProgram()
+    res.status(200).json({
+      message: "Program resumed succesfully"
+    })
+  } catch (error) {
+    if(error instanceof Error) {
+      res.status(400).json({
+        message: error.message
       })
     }
   }

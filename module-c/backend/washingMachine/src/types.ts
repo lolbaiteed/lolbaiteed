@@ -7,6 +7,6 @@ export type ProgramRequest = {
 };
 
 export type WalletTransaction = {
-  machineId: string | undefined;
-  credits: number;
+  machineUsageId: string | undefined;
+  amount: number;
 }

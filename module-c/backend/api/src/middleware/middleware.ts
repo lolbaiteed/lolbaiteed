@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { loginShcema, registerSchema, addMachineSchema} from '../schemas';
+import { loginShcema, registerSchema} from '../schemas';
 import { randomBytes, scryptSync, timingSafeEqual } from 'crypto';
 import { PrismaClient } from '@prisma/client';
 
@@ -82,15 +82,4 @@ export async function checkToken(req: Request, res: Response, next: NextFunction
     });
     }
   }
-}
-
-export function validateMachine(req: Request, res: Response, next: NextFunction) {
-  try {
-    req.body = addMachineSchema.parse(req.body);
-    next();
-  } catch (error) {
-    res.status(418).json({ 
-      message: "I'am a teapot",
-      errors: error instanceof Error ? error.message : String(error) })
-  } 
 }

@@ -1,8 +1,7 @@
 import express, { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { validateRegister, validateLogin, verifyPasswd, generateToken, hashPasswd, checkToken, validateMachine } from './middleware/middleware';
-import { LoginInput, RegisterInput, addMachineSchema, setProgramInput } from 'schemas';
-import { tr } from 'zod/locales';
+import { validateRegister, validateLogin, verifyPasswd, generateToken, hashPasswd, checkToken } from './middleware/middleware';
+import { LoginInput, RegisterInput, setProgramInput } from 'schemas';
 
 const app = express();
 const router = express.Router();
@@ -68,7 +67,7 @@ router.post('/users/login', validateLogin, async (req: Request, res: Response) =
 
 router.post('/users/logout', checkToken, async (req: Request, res: Response) => {
   const token = (req as any).token;
-  if(!token) throw new Error("Cannot fetch token after validate")
+  if (!token) throw new Error("Cannot fetch token after validate")
   try {
     await prisma.userToken.update({
       where: { token: token },
@@ -76,7 +75,7 @@ router.post('/users/logout', checkToken, async (req: Request, res: Response) => 
     })
     res.status(200).json({ message: "Logged out successfuly" })
   } catch (error) {
-    if(error instanceof Error) {
+    if (error instanceof Error) {
       res.status(500).json({
         message: error.message
       })
@@ -118,7 +117,7 @@ router.post('/users/me/credits', checkToken, async (req: Request, res: Response)
 
     if (!findUser) return res.status(400).json({ message: "user not found" })
 
-    if(machineUsageId === null){
+    if (machineUsageId === null) {
       if (!Number.isFinite(amount) || amount <= 0) return res.status(400).json({ messsage: "Invalid amount" })
 
       const newCreditsAmount = await prisma.user.update({
@@ -130,15 +129,17 @@ router.post('/users/me/credits', checkToken, async (req: Request, res: Response)
         data: {
           userId: userId,
           credits: amount,
-          machineUsageId: machineUsageId 
+          machineUsageId: machineUsageId
         }
       })
 
       res.status(200).json({ message: "Credits added successfuly", credits: newCreditsAmount.credits })
     } else {
 
+      let propperMachineId = machineUsageId.split("M").pop();
+
       const userCurrentCredits = findUser.credits;
-      if(userCurrentCredits === null || userCurrentCredits < amount) return res.status(400).json({ message: "You don't have enough credits for that operation" }) 
+      if (userCurrentCredits === null || userCurrentCredits < amount) return res.status(400).json({ message: "You don't have enough credits for that operation" })
 
       const newCreditsAmount = await prisma.user.update({
         where: { id: userId },
@@ -149,59 +150,19 @@ router.post('/users/me/credits', checkToken, async (req: Request, res: Response)
         data: {
           userId: userId,
           credits: amount,
-          machineUsageId: machineUsageId 
+          machineUsageId: Number(propperMachineId)
         }
       })
 
       res.status(200).json({
         message: "Transaction successful",
-        credits: newCreditsAmount.credits
+        creditsBefore: userCurrentCredits,
+        creditsAfter: newCreditsAmount.credits
       })
     }
 
   } catch (error) {
     res.status(500).json({ message: `${error}` })
-  }
-})
-           
-router.post('/machine/add', validateMachine, async (req: Request, res: Response) => {
-  try {
-    const { id, url, name, locationX, locationY } = req.body as addMachineSchema;
-    const machine = await prisma.machine.create({
-      data: { id, url, name, locationX, locationY }
-    });
-
-    res.status(201).json({
-      message: "machine created",
-      machine: {
-        id: machine.id,
-        url: machine.url,
-        name: machine.name,
-        locationX: machine.locationX,
-        locationY: machine.locationY,
-      }
-    });
-
-  } catch (error) {
-    res.status(500).json({ message: `${error}` })
-  }
-})
-
-router.post('/machine/:id/update', checkToken, async (req: Request, res: Response) => {
-  try {
-    const id = req.params.id;
-    const { name, locationX, locationY } = req.body as addMachineSchema;
-    const machineFound = await prisma.machine.findFirst({ where: { id: id } })
-
-    if (!machineFound) return res.status(404).json({ message: "Machine not found" });
-
-    const updatedData = await prisma.machine.update({
-      where: { id: id },
-      data: { name: name, locationX: locationX, locationY: locationY }
-    })
-    res.status(200).json({ message: "Machine data updated successfuly", updatedData })
-  } catch (error) {
-    res.status(500).json({ message: "Internal Server error" })
   }
 })
 
@@ -211,19 +172,19 @@ router.get('/machine/:id', checkToken, async (req: Request, res: Response) => {
   try {
     const resp = await fetch(url, {
       method: "GET",
-      headers: {"Content-Type": "application/json"},
+      headers: { "Content-Type": "application/json" },
     });
 
     const result = await resp.json();
 
-    if(!result || result === null || result === undefined) throw new Error("Cannot fetch data from machine"); 
+    if (!result || result === null || result === undefined) throw new Error("Cannot fetch data from machine");
 
     res.status(200).json({
       result
     });
-    
+
   } catch (error) {
-    if(error instanceof Error) {
+    if (error instanceof Error) {
       res.status(500).json({
         message: `${error}`
       })
@@ -241,9 +202,9 @@ router.get('/machines', async (_req: Request, res: Response) => {
   }
 })
 
-router.post('/machine/:id/start', checkToken, async(req: Request, res: Response) => {
+router.post('/machine/:id/start', checkToken, async (req: Request, res: Response) => {
   const id = req.params.id;
-  const data = req.body as setProgramInput; 
+  const data = req.body as setProgramInput;
   const url = `http://${id}:4000/control/start`
   try {
     const resp = await fetch(url, {
@@ -255,20 +216,97 @@ router.post('/machine/:id/start', checkToken, async(req: Request, res: Response)
       body: JSON.stringify(data)
     })
     const result = await resp.json();
-    
-    if(!resp.ok) throw new Error("You don't have enough credits")
+
+    switch (resp.status) {
+      case 500:
+        throw new Error("Operation not allowed in current state")
+
+      case 400:
+        throw new Error("Invalid program parameters")
+
+      case 404:
+        throw new Error("Insufficient credits")
+
+      default: null
+    }
 
     res.status(200).json({
       result,
     })
 
   } catch (error) {
-    if(error instanceof Error) {
-      res.status(500).json({
+    if (error instanceof Error) {
+      res.status(400).json({
         message: error.message,
         stackTrace: error.stack
       })
     }
+  }
+})
+
+router.patch('/machine/:id/stop', checkToken, async (req: Request, res: Response) => {
+  const id = req.params.id;
+  const url = `http://${id}:4000/control/stop`;
+  try {
+    const resp = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${(req as any).token}`
+      },
+    })
+    const result = await resp.json();
+
+    res.status(200).json({
+      result
+    })
+
+  } catch (error) {
+
+  }
+})
+
+router.patch('/machine/:id/pause', checkToken, async (req: Request, res: Response) => {
+  const id = req.params.id;
+  const url = `http://${id}:4000/control/pause`
+  try {
+    const resp = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${(req as any).token}`
+      },
+    })
+    const result = await resp.json();
+
+    res.status(200).json({
+      result
+    })
+
+  } catch (error) {
+
+  }
+})
+
+router.patch('/machine/:id/resume', checkToken, async (req: Request, res: Response) => {
+  const id = req.params.id;
+  const url = `http://${id}:4000/control/resume`
+  try {
+    const resp = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${(req as any).token}`
+      },
+    })
+    const result = await resp.json();
+
+    res.status(200).json({
+      result
+    })
+
+  } catch (error) {
+
   }
 })
 
