@@ -1,12 +1,18 @@
 import { WalletTransaction } from "types";
 
+let remainingTime = 0;
+let startTime = 0;
+let totalDuration = 0;
+let timeBuffer = 0;
+
 export function getAvailabeProgram() {
   const temperature = [30, 40, 50];
   const spinSpeed = [800, 1200, 1600];
   const name = "normal";
   const duration = 3600;
-
-  return { temperature, spinSpeed, name, duration };
+  const startDate: string = ""; 
+  const programRemainingTime: number = 0;
+  return { programRemainingTime, startDate, temperature, spinSpeed, name, duration };
 }
 
 type Program = ReturnType<typeof getAvailabeProgram>
@@ -20,9 +26,6 @@ export enum Status {
 let currentStatus: Status = Status.Idle;
 let currentProgram: Program | null = null;
 let currnetTimeout: NodeJS.Timeout | null = null;
-let remainingTime = 0;
-let startTime = 0;
-let totalDuration = 0;
 
 function canTransition(from: Status, to: Status): boolean {
   switch (from) {
@@ -91,7 +94,7 @@ async function walletTransaction(token: any) {
   return result;
 }
 
-function timeout(duration?: number): any {
+function timeout(duration: number | undefined, action?: "resume" | "remainTime" | "start"): any {
   const state = {
     inProgress: false,
     done: false
@@ -99,7 +102,13 @@ function timeout(duration?: number): any {
 
   if (currentProgram != null) state.inProgress = true;
 
-  if (!duration) {
+  if(action === "remainTime" && duration === undefined) {
+    const now = Date.now()
+    const elapsed = now - startTime
+    remainingTime = Math.max(totalDuration - elapsed, 0)
+    console.log({ now, startTime })
+    return remainingTime
+  } else if (duration === undefined && action === "resume") {
     if (getStatus() === Status.Paused && remainingTime > 0) {
       setStatus(Status.Operational);
       startTime = Date.now();
@@ -113,12 +122,13 @@ function timeout(duration?: number): any {
         state.inProgress = false;
       }, remainingTime)
     }
-  } else {
+  } else if (duration != undefined && !action){
     if (getStatus() === Status.Operational) {
       if (currnetTimeout) clearTimeout(currnetTimeout);
       totalDuration = duration * 1000;
       startTime = Date.now();
       remainingTime = totalDuration;
+      timeBuffer = 0;
 
       currnetTimeout = setTimeout(() => {
         setStatus(Status.Idle);
@@ -130,7 +140,14 @@ function timeout(duration?: number): any {
       }, totalDuration)
     }
   }
+
   return state;
+}
+
+function convertDate(timestamp: number) {
+  const date = new Date(timestamp);
+  const converted = date.toISOString()
+  return { converted, timestamp }
 }
 
 export async function setPorgram(temperature: number, spinSpeed: number, token: any): Promise<any> {
@@ -151,6 +168,14 @@ export async function setPorgram(temperature: number, spinSpeed: number, token: 
     throw new Error("Machine is busy, wait to previous program end");
   }
 
+  setStatus(Status.Operational);
+
+  let delay = timeout(available.duration, undefined)
+
+  const startDate = convertDate(startTime);
+
+  const clcRemainingTime = Number(timeout(undefined, "remainTime")) 
+
   let walletStatus = await walletTransaction(token)
 
   let creditsDeducted = walletStatus.creditsBefore - walletStatus.creditsAfter;
@@ -160,12 +185,10 @@ export async function setPorgram(temperature: number, spinSpeed: number, token: 
     temperature: [temperature],
     spinSpeed: [spinSpeed],
     remainingCredits: walletStatus.creditsAfter,
-    creditsDeducted: creditsDeducted
+    creditsDeducted: creditsDeducted,
+    startDate: startDate.converted,
+    programRemainingTime: clcRemainingTime 
   }
-
-  setStatus(Status.Operational);
-
-  let delay = timeout(newProgram.duration)
 
   currentProgram = newProgram;
 
@@ -188,14 +211,13 @@ export function stopProgram(): void {
 }
 
 export function pauseProgram(): void {
-
   if (getStatus() === Status.Operational) {
     if (currnetTimeout) {
-      clearTimeout(currnetTimeout);
-      currnetTimeout = null;
+      clearTimeout(currnetTimeout)
+      currnetTimeout = null
 
-      const elapsed = Date.now() - startTime;
-      remainingTime = Math.max(totalDuration - elapsed, 0);
+      const elapsed = Date.now() - startTime
+      remainingTime = Math.max(totalDuration - elapsed, 0)
       setStatus(Status.Paused)
     }
   } else throw new Error("Operation not allowed in current state")
@@ -203,6 +225,6 @@ export function pauseProgram(): void {
 
 export function resumeProgram(): void {
   if (getStatus() === Status.Paused) {
-    timeout();
+    timeout(undefined, "resume");
   } else throw new Error("Operation not allowed in current state")
 }

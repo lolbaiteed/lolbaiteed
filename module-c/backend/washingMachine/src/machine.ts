@@ -1,7 +1,7 @@
-import express, {Response, Request} from 'express'
+import express, { Response, Request } from 'express'
 import { getAvailabeProgram, getCurrentProgram, getStatus, pauseProgram, resumeProgram, setPorgram, stopProgram } from './utils';
-import { ProgramRequest } from 'types';
-import { checkOwner, setOwner } from 'middleware';
+import { ProgramRequest } from './types';
+import { checkOwner, setOwner } from './middleware';
 
 
 const app = express();
@@ -13,7 +13,7 @@ app.get("/getInfo", (_req, res: Response) => {
     const currentProgram = getCurrentProgram();
     const opStatus = getStatus();
     res.status(200).json({
-      name: process.env.MACHINE_NAME, 
+      name: process.env.MACHINE_NAME,
       type: process.env.MACHINE_TYPE,
       brand: process.env.MACHINE_BRAND,
       model: process.env.MACHINE_MODEL,
@@ -27,29 +27,36 @@ app.get("/getInfo", (_req, res: Response) => {
       ],
       status: {
         operationalStatus: opStatus,
-        currentProgram: currentProgram 
+        currentProgram: {
+          temperature: currentProgram?.temperature,
+          spinSpeed: currentProgram?.spinSpeed,
+          name: currentProgram?.name,
+          duration: currentProgram?.duration,
+          startTime: currentProgram?.startDate,
+          remainingTime: currentProgram?.programRemainingTime
+        } 
       }
     })
   } catch (error) {
-    if(error instanceof Error) {
+    if (error instanceof Error) {
       res.status(500).json({
         message: error.message,
         stackTrace: error.stack
       })
-      console.log({error});
+      console.log({ error });
     }
   }
 })
 
-app.post("/control/start", setOwner ,async (req: Request, res: Response) => {
+app.post("/control/start", setOwner, async (req: Request, res: Response) => {
   const data = req.body as ProgramRequest;
-  const token = (req as any).token; 
-  try {  
+  const token = (req as any).token;
+  try {
     let program = await setPorgram(data.parameters.temperature, data.parameters.spinSpeed, token);
     res.status(200).json({
       message: "Machine started succesfully",
       machineId: process.env.MACHINE_ID,
-      porgramName: data.name, 
+      porgramName: data.name,
       parameters: {
         temperature: program?.temperature,
         spinSpeed: program?.spinSpeed,
@@ -59,17 +66,17 @@ app.post("/control/start", setOwner ,async (req: Request, res: Response) => {
       remainingCredits: program?.remainingCredits
     })
   } catch (error) {
-    if(error instanceof Error) {
+    if (error instanceof Error) {
       res.status(500).json({
         name: error.name,
         message: error.message,
         stackTrace: error.stack
-      }) 
+      })
     } else if (error instanceof TypeError) {
       res.status(400).json({
         name: error.name,
         message: error.message
-      }) 
+      })
     } else if (error instanceof WebTransportError) {
       res.status(404).json({
         name: error.name,
@@ -86,7 +93,7 @@ app.post("/control/stop", checkOwner, async (_req: Request, res: Response) => {
       message: "Mahcine stopped succesfully"
     })
   } catch (error) {
-    if(error instanceof Error) {
+    if (error instanceof Error) {
       res.status(400).json({
         message: error.message
       })
@@ -94,14 +101,14 @@ app.post("/control/stop", checkOwner, async (_req: Request, res: Response) => {
   }
 })
 
-app.post("/control/pause", async (_req: Request, res: Response) => {
+app.post("/control/pause", checkOwner, async (_req: Request, res: Response) => {
   try {
     pauseProgram()
     res.status(200).json({
       message: "Program paused succesfully"
     })
   } catch (error) {
-    if(error instanceof Error) {
+    if (error instanceof Error) {
       res.status(400).json({
         message: error.message
       })
@@ -109,14 +116,14 @@ app.post("/control/pause", async (_req: Request, res: Response) => {
   }
 })
 
-app.post("/control/resume", async (_req: Request, res: Response) => {
+app.post("/control/resume", checkOwner, async (_req: Request, res: Response) => {
   try {
     resumeProgram()
     res.status(200).json({
       message: "Program resumed succesfully"
     })
   } catch (error) {
-    if(error instanceof Error) {
+    if (error instanceof Error) {
       res.status(400).json({
         message: error.message
       })
