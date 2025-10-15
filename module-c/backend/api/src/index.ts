@@ -180,7 +180,7 @@ router.post('/users/me/credits', checkToken, async (req: Request, res: Response)
   }
 })
 
-router.get('/machine/:id', checkToken, async (req: Request, res: Response) => {
+router.get('/machines/:id', checkToken, async (req: Request, res: Response) => {
   const id = req.params.id;
   const url = `http://${id}:4000/getInfo`;
   try {
@@ -217,7 +217,7 @@ router.get('/machines', async (_req: Request, res: Response) => {
   }
 })
 
-router.post('/machine/:id/start', checkToken, async (req: Request, res: Response) => {
+router.post('/machines/:id/start', checkToken, async (req: Request, res: Response) => {
   const id = req.params.id;
   const data = req.body as setProgramInput;
   const url = `http://${id}:4000/control/start`
@@ -259,7 +259,7 @@ router.post('/machine/:id/start', checkToken, async (req: Request, res: Response
   }
 })
 
-router.patch('/machine/:id/stop', checkToken, async (req: Request, res: Response) => {
+router.patch('/machines/:id/stop', checkToken, async (req: Request, res: Response) => {
   const id = req.params.id;
   const url = `http://${id}:4000/control/stop`;
   try {
@@ -289,7 +289,7 @@ router.patch('/machine/:id/stop', checkToken, async (req: Request, res: Response
   }
 })
 
-router.patch('/machine/:id/pause', checkToken, async (req: Request, res: Response) => {
+router.patch('/machines/:id/pause', checkToken, async (req: Request, res: Response) => {
   const id = req.params.id;
   const url = `http://${id}:4000/control/pause`
   try {
@@ -319,7 +319,7 @@ router.patch('/machine/:id/pause', checkToken, async (req: Request, res: Respons
   }
 })
 
-router.patch('/machine/:id/resume', checkToken, async (req: Request, res: Response) => {
+router.patch('/machines/:id/resume', checkToken, async (req: Request, res: Response) => {
   const id = req.params.id;
   const url = `http://${id}:4000/control/resume`
   try {

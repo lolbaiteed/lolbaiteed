@@ -1,0 +1,49 @@
+name: API Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: mysql:latest
+        env:
+          MYSQL_DATABASE: modulecdb
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+      api:
+        build:
+          context: ./backend/api/
+        ports:
+          - 3000:3000
+        options: >-
+          --health-cmd="curl --fail http://localhost:3000/api/v1/users/login || exit 1"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Wait for API to be up
+        run: |
+          for i in {1..20}; do
+            curl -s http://localhost:3000/api/v1/machines && break
+            sleep 5
+          done
+      - name: Run tests
+        run: pytest tests/
