@@ -8,5 +8,6 @@ export type ProgramRequest = {
 
 export type WalletTransaction = {
   machineUsageId: string | undefined;
+  programParams: any;
   amount: number;
 }

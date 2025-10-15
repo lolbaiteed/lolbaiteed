@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 import { loginShcema, registerSchema} from '../schemas';
 import { randomBytes, scryptSync, timingSafeEqual } from 'crypto';
 import { PrismaClient } from '@prisma/client';
+import { AuthenticationError } from './types';
+
 
 const prisma = new PrismaClient();
 
@@ -60,7 +62,7 @@ export async function checkToken(req: Request, res: Response, next: NextFunction
   try {
     const authHeader = req.headers['authorization'];
     if (!authHeader?.startsWith("Bearer ")) {
-      throw new Error("Invalid token type")
+      throw new AuthenticationError("Invalid token type")
     } 
     const token = authHeader.split(" ")[1];
 
@@ -69,14 +71,14 @@ export async function checkToken(req: Request, res: Response, next: NextFunction
     });
 
     if (!findToken || findToken.revokedAt) {
-      throw new Error("Invalid or expired token")
+      throw new AuthenticationError("Invalid or expired token")
     }
 
     (req as any).token = token;
     (req as any).userId = findToken.userId;
     next();
   } catch (error) {
-    if(error instanceof Error) {
+    if(error instanceof AuthenticationError) {
     res.status(401).json({
       message: error.message
     });

@@ -1,5 +1,5 @@
 import express, { Response, Request } from 'express'
-import { getAvailabeProgram, getCurrentProgram, getStatus, pauseProgram, resumeProgram, setPorgram, stopProgram } from './utils';
+import { getAvailabeProgram, getCurrentProgram, getStatus, pauseProgram, resumeProgram, setPorgram, stopProgram, timeout} from './utils';
 import { ProgramRequest } from './types';
 import { checkOwner, setOwner } from './middleware';
 
@@ -7,12 +7,15 @@ import { checkOwner, setOwner } from './middleware';
 const app = express();
 app.use(express.json());
 
-app.get("/getInfo", (_req, res: Response) => {
+app.get("/getInfo", checkOwner, (req: Request, res: Response) => {
   try {
     const availableProgram = getAvailabeProgram();
     const currentProgram = getCurrentProgram();
     const opStatus = getStatus();
+    const remainingTime = timeout(undefined, "remainTime");
+    const cycle = (req as any).myCycle;
     res.status(200).json({
+      id: process.env.MACHINE_ID,
       name: process.env.MACHINE_NAME,
       type: process.env.MACHINE_TYPE,
       brand: process.env.MACHINE_BRAND,
@@ -33,9 +36,10 @@ app.get("/getInfo", (_req, res: Response) => {
           name: currentProgram?.name,
           duration: currentProgram?.duration,
           startTime: currentProgram?.startDate,
-          remainingTime: currentProgram?.programRemainingTime
+          remainingTime: Math.round(remainingTime / 1000) 
         } 
-      }
+      },
+      myCycle: cycle
     })
   } catch (error) {
     if (error instanceof Error) {

@@ -109,6 +109,8 @@ router.post('/users/me/credits', checkToken, async (req: Request, res: Response)
   const userId = (req as any).userId;
   const amount = Number(req.body.amount);
   const machineUsageId = req.body.machineUsageId || null;
+  const toolcahin = req.headers["request-toolchain"] || null;
+  const programParameters = req.body.programParams;
 
   try {
     const findUser = await prisma.user.findUnique({
@@ -117,6 +119,18 @@ router.post('/users/me/credits', checkToken, async (req: Request, res: Response)
 
     if (!findUser) return res.status(400).json({ message: "user not found" })
 
+    if(toolcahin != null) {
+      const usage = await prisma.machineUsage.create({
+        data: {
+          userId: findUser.id,
+          machineId: machineUsageId,
+          action: "start",
+          parameters: programParameters
+        }
+      })
+
+      if(!usage) throw new Error("usage not created")
+    }
     if (machineUsageId === null) {
       if (!Number.isFinite(amount) || amount <= 0) return res.status(400).json({ messsage: "Invalid amount" })
 
@@ -128,7 +142,7 @@ router.post('/users/me/credits', checkToken, async (req: Request, res: Response)
       await prisma.walletTransaction.create({
         data: {
           userId: userId,
-          credits: amount,
+          credits: -Math.abs(amount),
           machineUsageId: machineUsageId
         }
       })
@@ -172,7 +186,8 @@ router.get('/machine/:id', checkToken, async (req: Request, res: Response) => {
   try {
     const resp = await fetch(url, {
       method: "GET",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json",
+                  "Request-Type": "Check" },
     });
 
     const result = await resp.json();
@@ -218,11 +233,11 @@ router.post('/machine/:id/start', checkToken, async (req: Request, res: Response
     const result = await resp.json();
 
     switch (resp.status) {
-      case 500:
-        throw new Error("Operation not allowed in current state")
-
       case 400:
         throw new Error("Invalid program parameters")
+
+      case 500:
+        throw new Error("Operation not allowed in current state")
 
       case 404:
         throw new Error("Insufficient credits")
@@ -257,12 +272,20 @@ router.patch('/machine/:id/stop', checkToken, async (req: Request, res: Response
     })
     const result = await resp.json();
 
+    switch (resp.status) {
+      case 400:
+        throw new Error("Operation not allowed in current state")
+      default: null
+    }
+
     res.status(200).json({
       result
     })
 
   } catch (error) {
-
+    res.status(500).json({
+      message: "Internal Server Error"
+    })
   }
 })
 
@@ -279,12 +302,20 @@ router.patch('/machine/:id/pause', checkToken, async (req: Request, res: Respons
     })
     const result = await resp.json();
 
+    switch (resp.status) {
+      case 400:
+        throw new Error("Operation not allowed in current state")
+      default: null
+    }
+
     res.status(200).json({
       result
     })
 
   } catch (error) {
-
+    res.status(500).json({
+      message: "Internal Server Error"
+    })
   }
 })
 
@@ -301,12 +332,20 @@ router.patch('/machine/:id/resume', checkToken, async (req: Request, res: Respon
     })
     const result = await resp.json();
 
+    switch (resp.status) {
+      case 400:
+        throw new Error("Operation not allowed in current state")
+      default: null
+    }
+
     res.status(200).json({
       result
     })
 
   } catch (error) {
-
+    res.status(500).json({
+      message: "Internal Server Error"
+    })
   }
 })
 

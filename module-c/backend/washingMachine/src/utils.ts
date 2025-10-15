@@ -11,8 +11,7 @@ export function getAvailabeProgram() {
   const name = "normal";
   const duration = 3600;
   const startDate: string = ""; 
-  const programRemainingTime: number = 0;
-  return { programRemainingTime, startDate, temperature, spinSpeed, name, duration };
+  return { startDate, temperature, spinSpeed, name, duration };
 }
 
 type Program = ReturnType<typeof getAvailabeProgram>
@@ -72,9 +71,10 @@ export function clcCost(duration: number) {
   return cost;
 }
 
-async function walletTransaction(token: any) {
+async function walletTransaction(token: any, programParams: Program) {
   const data: WalletTransaction = {
     machineUsageId: process.env.MACHINE_ID,
+    programParams,
     amount: clcCost(3600)
   }
   const url = "http://api:3000/api/v1/users/me/credits"
@@ -82,7 +82,8 @@ async function walletTransaction(token: any) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`
+      "Authorization": `Bearer ${token}`,
+      "Request-Toolchain": "MachineUsage"
     },
     body: JSON.stringify(data)
   })
@@ -94,7 +95,7 @@ async function walletTransaction(token: any) {
   return result;
 }
 
-function timeout(duration: number | undefined, action?: "resume" | "remainTime" | "start"): any {
+export function timeout(duration: number | undefined, action?: "resume" | "remainTime" | "start"): any {
   const state = {
     inProgress: false,
     done: false
@@ -176,21 +177,40 @@ export async function setPorgram(temperature: number, spinSpeed: number, token: 
 
   const clcRemainingTime = Number(timeout(undefined, "remainTime")) 
 
-  let walletStatus = await walletTransaction(token)
+  const newProgramBuilder: Promise<Program> = new Promise(async (resolve, reject) => {
+    try {
+      const program = {
+        ...available,
+        temperature: [temperature],
+        spinSpeed: [spinSpeed],
+        startTime: startDate.converted,
+      };
+      resolve(program)
+    } catch (error) {
+      reject(error)
+    }
+  })
+
+  const baseProgram = await newProgramBuilder;
+
+  let walletStatus = await walletTransaction(token, baseProgram)
 
   let creditsDeducted = walletStatus.creditsBefore - walletStatus.creditsAfter;
 
-  const newProgram = {
-    ...available,
-    temperature: [temperature],
-    spinSpeed: [spinSpeed],
-    remainingCredits: walletStatus.creditsAfter,
-    creditsDeducted: creditsDeducted,
-    startDate: startDate.converted,
-    programRemainingTime: clcRemainingTime 
+  interface ExtendedProgram extends Program {
+    remainingCredits: any,
+    creditsDeducted: number
+    programRemainingTime: number
   }
 
-  currentProgram = newProgram;
+  const fullNewProgram: ExtendedProgram = {
+    ...baseProgram,
+    remainingCredits: walletStatus.creditsAfter,
+    creditsDeducted: creditsDeducted,
+    programRemainingTime: clcRemainingTime
+  }
+
+  currentProgram = fullNewProgram;
 
   if (delay.inProgress === true && delay.done === false) throw new Error
 
@@ -200,8 +220,6 @@ export async function setPorgram(temperature: number, spinSpeed: number, token: 
 }
 
 export function stopProgram(): void {
-  if (getStatus() != Status.Operational || getStatus() != Status.Paused) throw new Error("Operation not allowed in current state")
-
   if (currnetTimeout) {
     clearTimeout(currnetTimeout);
     currnetTimeout = null;
