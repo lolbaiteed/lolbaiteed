@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-import { validateRegister, validateLogin, verifyPasswd, generateToken, hashPasswd, checkToken } from './middleware/middleware';
-import { LoginInput, RegisterInput, setProgramInput } from 'schemas';
+import { PrismaClient, Prisma } from '@prisma/client';
+import { validateRegister, validateLogin, verifyPasswd, generateToken, hashPasswd, checkToken, validateMachine } from './middleware/middleware';
+import { LoginInput, RegisterInput, setProgramInput, addMachine } from 'schemas';
 
 const app = express();
 const router = express.Router();
@@ -18,6 +18,9 @@ router.post('/users/register', validateRegister, async (req: Request, res: Respo
     const user = await prisma.user.create({
       data: { email, name, passwordHash, updatedAt: new Date() },
     });
+    
+    if(!user) return res.status(400).json({ message: "Failed to register user" }) 
+
     res.status(201).json({
       message: "Registrated successfuly",
       user: {
@@ -28,8 +31,14 @@ router.post('/users/register', validateRegister, async (req: Request, res: Respo
       }
     });
   } catch (error) {
-    res.status(500).json({ error: `${error}` });
-  }
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        switch (error.code) {
+          case 'P2002':
+            res.status(400).json({message: "Failed to register user" }) 
+            break
+        }
+      }
+    }
 });
 
 router.post('/users/login', validateLogin, async (req: Request, res: Response) => {
@@ -39,10 +48,10 @@ router.post('/users/login', validateLogin, async (req: Request, res: Response) =
       where: { email: email }
     })
 
-    if (!user) return res.status(401).json({ message: "Invalid email/password" });
+    if (!user) return res.status(401).json({ message: "Invalid email or password" });
 
     const validatePasswdHash = verifyPasswd(password, user.passwordHash)
-    if (!validatePasswdHash) return res.status(401).json({ message: "Invalid email/password" });
+    if (!validatePasswdHash) return res.status(401).json({ message: "Invalid email or password" });
 
     const token = generateToken();
 
@@ -187,7 +196,8 @@ router.get('/machines/:id', checkToken, async (req: Request, res: Response) => {
     const resp = await fetch(url, {
       method: "GET",
       headers: { "Content-Type": "application/json",
-                  "Request-Type": "Check" },
+                  "Request-Type": "Check",
+                  "Authorization": `Bearer ${(req as any).token}`}
     });
 
     const result = await resp.json();
@@ -208,10 +218,46 @@ router.get('/machines/:id', checkToken, async (req: Request, res: Response) => {
 
 })
 
+router.post('/machines/add', validateMachine, async(req: Request, res: Response) => {
+  try {
+    const { id, url, name, locationX, locationY } = req.body as addMachine
+    const machine = await prisma.machine.create({
+      data: { id, url, name, locationX, locationY }
+    });
+
+    if(!machine) return res.status(418);
+
+    res.status(201).json({
+      message: "machine created",
+      machine: {
+        id: machine.id,
+        url: machine.url,
+        name: machine.name,
+        type: "Washing Machine", 
+        brand: "Samsung",
+        model: "WF10000",
+        locationX: machine.locationX,
+        locationY: machine.locationY
+      }
+    })
+
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" })  
+  }
+})
+
 router.get('/machines', async (_req: Request, res: Response) => {
   try {
     const machines = await prisma.machine.findMany();
-    res.status(200).json({ machines });
+    const response = machines.map(data => ({
+      ...data,
+      type: "Washing Machine", 
+      brand: "Samsung",
+      model: "WF10000",
+    }))
+    res.status(200).json({ 
+      response
+    });
   } catch (error) {
     res.status(500).json({ message: `${error}` })
   }
@@ -260,37 +306,47 @@ router.post('/machines/:id/start', checkToken, async (req: Request, res: Respons
 })
 
 router.patch('/machines/:id/stop', checkToken, async (req: Request, res: Response) => {
+  const userId = (req as any).userId;
   const id = req.params.id;
   const url = `http://${id}:4000/control/stop`;
   try {
-    const resp = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${(req as any).token}`
-      },
-    })
-    const result = await resp.json();
+      const resp = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${(req as any).token}`
+        },
+      })
+      const result = await resp.json();
 
-    switch (resp.status) {
-      case 400:
-        throw new Error("Operation not allowed in current state")
-      default: null
+      const findUser = await prisma.user.findUnique({
+        where: { id: userId }
+      })
+      if (!findUser) return res.status(400).json({ message: "user not found" })
+      const usage = await prisma.machineUsage.create({
+        data: {
+          userId: findUser.id,
+          machineId: id,
+          action: "stop",
+          parameters: JSON.stringify({}) 
+        }
+      })
+      if(!usage) throw new Error(`usage not created: ${usage}`)
+
+      res.status(200).json({
+        result
+      })
     }
-
-    res.status(200).json({
-      result
-    })
-
-  } catch (error) {
+   catch (error) {
     res.status(500).json({
-      message: "Internal Server Error"
+      message: `${error}` 
     })
   }
 })
 
 router.patch('/machines/:id/pause', checkToken, async (req: Request, res: Response) => {
   const id = req.params.id;
+  const userId = (req as any).userId;
   const url = `http://${id}:4000/control/pause`
   try {
     const resp = await fetch(url, {
@@ -301,6 +357,8 @@ router.patch('/machines/:id/pause', checkToken, async (req: Request, res: Respon
       },
     })
     const result = await resp.json();
+    const message = result[0]
+    const data = result[1]
 
     switch (resp.status) {
       case 400:
@@ -308,19 +366,36 @@ router.patch('/machines/:id/pause', checkToken, async (req: Request, res: Respon
       default: null
     }
 
+    const findUser = await prisma.user.findUnique({
+      where: { id: userId }
+    })
+    if (!findUser) return res.status(400).json({ message: "user not found" })
+    const usage = await prisma.machineUsage.create({
+      data: {
+        userId: findUser.id,
+        machineId: id,
+        action: "pause",
+        parameters: data.programData
+      }
+    })
+    if(!usage) throw new Error(`usage not created: ${usage}`)
+
     res.status(200).json({
-      result
+      message
     })
 
   } catch (error) {
-    res.status(500).json({
-      message: "Internal Server Error"
-    })
+    if(error instanceof Error){
+      res.status(500).json({
+        message: error.message
+      })
+    }
   }
 })
 
 router.patch('/machines/:id/resume', checkToken, async (req: Request, res: Response) => {
   const id = req.params.id;
+  const userId = (req as any).userId;
   const url = `http://${id}:4000/control/resume`
   try {
     const resp = await fetch(url, {
@@ -330,7 +405,7 @@ router.patch('/machines/:id/resume', checkToken, async (req: Request, res: Respo
         "Authorization": `Bearer ${(req as any).token}`
       },
     })
-    const result = await resp.json();
+    const response = await resp.json();
 
     switch (resp.status) {
       case 400:
@@ -338,8 +413,22 @@ router.patch('/machines/:id/resume', checkToken, async (req: Request, res: Respo
       default: null
     }
 
+    const findUser = await prisma.user.findUnique({
+      where: { id: userId }
+    })
+    if (!findUser) return res.status(400).json({ message: "user not found" })
+    const usage = await prisma.machineUsage.create({
+      data: {
+        userId: findUser.id,
+        machineId: id,
+        action: "resume",
+        parameters: JSON.stringify({})
+      }
+    })
+    if(!usage) throw new Error(`usage not created: ${usage}`)
+
     res.status(200).json({
-      result
+      response
     })
 
   } catch (error) {

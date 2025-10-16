@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ur } from 'zod/locales';
 
 export const registerSchema = z.object({
   email: z.email({ message: "invalid email address" }),
@@ -19,6 +20,15 @@ export const setProgramSchema = z.object({
   })
 })
 
+export const addMachineSchema = z.object({
+  id: z.string(),
+  url: z.url(),
+  name: z.string().min(1),
+  locationX: z.int(),
+  locationY: z.int()
+})
+
 export type LoginInput = z.infer<typeof loginShcema>
 export type RegisterInput = z.infer<typeof registerSchema>
 export type setProgramInput = z.infer<typeof setProgramSchema>
+export type addMachine = z.infer<typeof addMachineSchema>

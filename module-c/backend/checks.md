@@ -3,7 +3,7 @@ Legend:
  - ?: Needed to fix(minor)
  - F: Needed to fix(major)
 
-[] POST /users/register {
+[X] POST /users/register {
 
   **Request Body:**
 
@@ -38,7 +38,7 @@ Legend:
   ```
 }
 
-[] POST /users/login {
+[X] POST /users/login {
 
   **Request Body:**
 
@@ -73,7 +73,7 @@ Legend:
   ```
 }
 
-[] POST /users/logout {
+[X] POST /users/logout {
 
   **Response (on success):** 200 OK
 
@@ -84,7 +84,7 @@ Legend:
   ```
 }
 
-[] GET /users/me {
+[X] GET /users/me {
 
   **Response:** 200 OK
 
@@ -98,7 +98,7 @@ Legend:
   ```
 }
 
-[] POST /users/me/credits {
+[X] POST /users/me/credits {
 
   **Request Body:**
 
@@ -126,7 +126,7 @@ Legend:
   ```
 }
 
-[] GET /machines {
+[X] GET /machines {
 
   **Response:** 200 OK
 
@@ -145,7 +145,7 @@ Legend:
   ```
 }
 
-[] GET /machines/:id {
+[X] GET /machines/:id {
 
   **Response:**
 
@@ -182,7 +182,7 @@ Legend:
   ```
 }
 
-[] POST /machines/:id/start {
+[X] POST /machines/:id/start {
 
   The backend calculates the credit cost as follows:
 
@@ -244,7 +244,7 @@ Legend:
   ```
 }
 
-[] PATCH /machines/:id/stop {
+[X] PATCH /machines/:id/stop {
 
   If the program stops successfully, create a log entry in the `MachineUsage` table, where the `action` field is set to `stop`, `parameters` field is set to empty JSON object.
 
@@ -273,7 +273,7 @@ Legend:
   ```
 }
 
-[] PATCH /machines/:id/pause {
+[X] PATCH /machines/:id/pause {
 
   If the program pauses successfully, create a log entry in the `MachineUsage` table, where the `action` field is set to `pause`.
 
@@ -302,7 +302,7 @@ Legend:
   ```
 }
 
-[] PATCH /machines/:id/resume {
+[X] PATCH /machines/:id/resume {
 
   If the program resumes successfully, create a log entry in the `MachineUsage` table, where the `action` field is set to `resume`.
 

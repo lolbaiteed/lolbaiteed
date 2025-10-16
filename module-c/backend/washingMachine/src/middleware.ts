@@ -14,24 +14,29 @@ export function setOwner(req: Request, _res: Response, next: NextFunction) {
 
 export function checkOwner(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers["authorization"];
-  const requestType = req.headers["request-type"] as string | undefined;
+  const requestType = req.headers["request-type"] as string | null;
   const requestedToken = authHeader?.split(" ")[1];
   const parts = req.path.split("/");
   const action = parts[parts.length - 1] || "access";
   const message = `You are not authorized to ${action} this machine`
-  let myCycle: boolean= false;
+  let myCycle = false;
 
-  if(requestedToken != token && requestType === undefined ) {
+  if(requestedToken !== token && !requestType) {
     return res.status(403).json({
       message
     })
-  } else if(token === undefined && requestType != undefined) {
-    myCycle 
-  } else if(requestedToken === token && requestType != undefined) {
+  }
+
+  if(token === undefined && requestType) {
+    myCycle = false 
+  }
+  
+  if(requestedToken === token && requestType) {
     myCycle = true
   }
 
   (req as any).myCycle = myCycle;
+  (req as any).token = token;
 
   next();
 }

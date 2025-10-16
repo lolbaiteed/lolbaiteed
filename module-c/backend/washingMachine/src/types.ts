@@ -11,3 +11,8 @@ export type WalletTransaction = {
   programParams: any;
   amount: number;
 }
+
+export type ActionResponse = {
+  machineUsageId: string | undefined;
+  programParams: any;
+}

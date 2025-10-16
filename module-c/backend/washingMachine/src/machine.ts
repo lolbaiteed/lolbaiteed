@@ -107,10 +107,12 @@ app.post("/control/stop", checkOwner, async (_req: Request, res: Response) => {
 
 app.post("/control/pause", checkOwner, async (_req: Request, res: Response) => {
   try {
-    pauseProgram()
-    res.status(200).json({
-      message: "Program paused succesfully"
-    })
+    let programData = pauseProgram(); 
+
+    res.status(200).json([
+      { message: "Program paused succesfully" },
+      { programData }
+    ])
   } catch (error) {
     if (error instanceof Error) {
       res.status(400).json({

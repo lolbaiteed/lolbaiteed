@@ -1,9 +1,10 @@
-import { WalletTransaction } from "types";
+import { ActionResponse, WalletTransaction } from "types";
 
 let remainingTime = 0;
 let startTime = 0;
 let totalDuration = 0;
 let timeBuffer = 0;
+let baseProgram: any;
 
 export function getAvailabeProgram() {
   const temperature = [30, 40, 50];
@@ -71,28 +72,28 @@ export function clcCost(duration: number) {
   return cost;
 }
 
-async function walletTransaction(token: any, programParams: Program) {
-  const data: WalletTransaction = {
-    machineUsageId: process.env.MACHINE_ID,
-    programParams,
-    amount: clcCost(3600)
-  }
-  const url = "http://api:3000/api/v1/users/me/credits"
-  const resp = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`,
-      "Request-Toolchain": "MachineUsage"
-    },
-    body: JSON.stringify(data)
-  })
+async function WalletTransaction(token: any, programParams: Program ) {
+    const data: WalletTransaction = {
+      machineUsageId: process.env.MACHINE_ID,
+      programParams,
+      amount: clcCost(3600)
+    }
+    const url = "http://api:3000/api/v1/users/me/credits"
+    const resp = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+        "Request-Toolchain": "MachineUsage"
+      },
+      body: JSON.stringify(data)
+    })
 
-  const result = await resp.json();
+    const result = await resp.json();
 
-  if (!resp.ok) throw new WebTransportError(`status: ${resp.status}`)
+    if (!resp.ok) throw new Error(`status: ${resp.status}`)
 
-  return result;
+    return result;
 }
 
 export function timeout(duration: number | undefined, action?: "resume" | "remainTime" | "start"): any {
@@ -183,7 +184,7 @@ export async function setPorgram(temperature: number, spinSpeed: number, token: 
         ...available,
         temperature: [temperature],
         spinSpeed: [spinSpeed],
-        startTime: startDate.converted,
+        startDate: startDate.converted,
       };
       resolve(program)
     } catch (error) {
@@ -191,10 +192,10 @@ export async function setPorgram(temperature: number, spinSpeed: number, token: 
     }
   })
 
-  const baseProgram = await newProgramBuilder;
+  baseProgram = await newProgramBuilder;
 
-  let walletStatus = await walletTransaction(token, baseProgram)
-
+  let walletStatus = await WalletTransaction(token, baseProgram) 
+  
   let creditsDeducted = walletStatus.creditsBefore - walletStatus.creditsAfter;
 
   interface ExtendedProgram extends Program {
@@ -220,15 +221,21 @@ export async function setPorgram(temperature: number, spinSpeed: number, token: 
 }
 
 export function stopProgram(): void {
+  try {
   if (currnetTimeout) {
     clearTimeout(currnetTimeout);
     currnetTimeout = null;
   }
   currentProgram = null;
   setStatus(Status.Idle);
+  } catch (error) {
+    if(error instanceof Error) {
+      console.log(error.message, error.name)
+    }
+  }
 }
 
-export function pauseProgram(): void {
+export function pauseProgram(): unknown{
   if (getStatus() === Status.Operational) {
     if (currnetTimeout) {
       clearTimeout(currnetTimeout)
@@ -237,6 +244,7 @@ export function pauseProgram(): void {
       const elapsed = Date.now() - startTime
       remainingTime = Math.max(totalDuration - elapsed, 0)
       setStatus(Status.Paused)
+      return currentProgram 
     }
   } else throw new Error("Operation not allowed in current state")
 }
