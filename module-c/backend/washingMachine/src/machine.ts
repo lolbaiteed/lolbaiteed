@@ -58,7 +58,7 @@ app.post("/control/start", setOwner, async (req: Request, res: Response) => {
   try {
     let program = await setPorgram(data.parameters.temperature, data.parameters.spinSpeed, token);
     res.status(200).json({
-      message: "Machine started succesfully",
+      message: "Machine started successfully",
       machineId: process.env.MACHINE_ID,
       porgramName: data.name,
       parameters: {
@@ -70,14 +70,14 @@ app.post("/control/start", setOwner, async (req: Request, res: Response) => {
       remainingCredits: program?.remainingCredits
     })
   } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({
+    if (error instanceof TypeError) {
+      res.status(400).json({
         name: error.name,
         message: error.message,
         stackTrace: error.stack
       })
-    } else if (error instanceof TypeError) {
-      res.status(400).json({
+    } else if (error instanceof Error) {
+      res.status(500).json({
         name: error.name,
         message: error.message
       })

@@ -91,7 +91,7 @@ async function WalletTransaction(token: any, programParams: Program ) {
 
     const result = await resp.json();
 
-    if (!resp.ok) throw new Error(`status: ${resp.status}`)
+    if (!resp.ok) throw new TypeError(`status: ${resp.status}`)
 
     return result;
 }
@@ -195,6 +195,8 @@ export async function setPorgram(temperature: number, spinSpeed: number, token: 
   baseProgram = await newProgramBuilder;
 
   let walletStatus = await WalletTransaction(token, baseProgram) 
+
+  if (!walletStatus) throw new TypeError
   
   let creditsDeducted = walletStatus.creditsBefore - walletStatus.creditsAfter;
 

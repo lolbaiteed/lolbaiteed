@@ -4,7 +4,7 @@ import time
 import random
 import string
 
-BASE_URL = "http://api:3000/api/v1"
+BASE_URL = "http://localhost:3000/api/v1"
 
 def random_email():
     return "testuser_{}@example.com".format(''.join(random.choices(string.ascii_lowercase+string.digits, k=8)))
@@ -63,11 +63,6 @@ def test_login_wrong_password(user1):
     assert resp.status_code == 401
     assert resp.json()["message"] == "Invalid email or password"
 
-def test_logout(token1):
-    resp = requests.post(f"{BASE_URL}/users/logout", headers={"Authorization": f"Bearer {token1}"})
-    assert resp.status_code == 200
-    assert resp.json()["message"] == "Logout successful"
-
 def test_logout_invalid_token():
     resp = requests.post(f"{BASE_URL}/users/logout", headers={"Authorization": "Bearer deadbeef"})
     assert resp.status_code == 401
@@ -75,6 +70,7 @@ def test_logout_invalid_token():
 
 def test_me(token1, user1):
     resp = requests.get(f"{BASE_URL}/users/me", headers={"Authorization": f"Bearer {token1}"})
+    print(resp.status_code, resp.text)
     assert resp.status_code == 200
     data = resp.json()
     assert data["email"] == user1["email"]
@@ -98,6 +94,8 @@ def test_add_credits_invalid(token1):
 
 def test_get_machines():
     resp = requests.get(f"{BASE_URL}/machines")
+    data = resp.json()
+    print(data, list)
     assert resp.status_code == 200
     assert isinstance(resp.json(), list)
     assert len(resp.json()) > 0
@@ -134,7 +132,7 @@ def test_start_machine_success(token1):
         out = resp.json()
         assert out["message"] == "Machine started successfully"
         assert out["parameters"]["duration"] == program["duration"]
-
+        
 def test_start_machine_invalid_params(token1):
     machines = requests.get(f"{BASE_URL}/machines").json()
     machine_id = machines[0]["id"]
@@ -212,5 +210,10 @@ def test_machine_action_requires_token():
     assert resp3.status_code == 401
     resp4 = requests.patch(f"{BASE_URL}/machines/{machine_id}/resume")
     assert resp4.status_code == 401
+
+def test_logout(token1):
+    resp = requests.post(f"{BASE_URL}/users/logout", headers={"Authorization": f"Bearer {token1}"})
+    assert resp.status_code == 200
+    assert resp.json()["message"] == "Logout successful"
 
 # Optionally add more edge cases as your logic evolves!

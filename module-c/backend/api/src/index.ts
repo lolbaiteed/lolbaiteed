@@ -82,7 +82,7 @@ router.post('/users/logout', checkToken, async (req: Request, res: Response) => 
       where: { token: token },
       data: { revokedAt: new Date() }
     })
-    res.status(200).json({ message: "Logged out successfuly" })
+    res.status(200).json({ message: "Logout successful" })
   } catch (error) {
     if (error instanceof Error) {
       res.status(500).json({
@@ -102,12 +102,10 @@ router.get('/users/me', checkToken, async (req: Request, res: Response) => {
     if (!findUser) return res.status(400).json({ message: "user not found" })
 
     res.status(200).json({
-      message: {
-        id: findUser.id,
-        email: findUser.email,
-        name: findUser.name,
-        credits: findUser.credits
-      }
+      id: findUser.id,
+      email: findUser.email,
+      name: findUser.name,
+      credits: findUser.credits
     })
   } catch (error) {
     res.status(500).json({ message: "Internal Server error" })
@@ -141,7 +139,7 @@ router.post('/users/me/credits', checkToken, async (req: Request, res: Response)
       if(!usage) throw new Error("usage not created")
     }
     if (machineUsageId === null) {
-      if (!Number.isFinite(amount) || amount <= 0) return res.status(400).json({ messsage: "Invalid amount" })
+      if (!Number.isFinite(amount) || amount <= 0) return res.status(400).json({ message: "Invalid amount" })
 
       const newCreditsAmount = await prisma.user.update({
         where: { id: userId },
@@ -156,7 +154,7 @@ router.post('/users/me/credits', checkToken, async (req: Request, res: Response)
         }
       })
 
-      res.status(200).json({ message: "Credits added successfuly", credits: newCreditsAmount.credits })
+      res.status(200).json({ message: "Credits added successfully", credits: newCreditsAmount.credits })
     } else {
 
       let propperMachineId = machineUsageId.split("M").pop();
@@ -204,9 +202,7 @@ router.get('/machines/:id', checkToken, async (req: Request, res: Response) => {
 
     if (!result || result === null || result === undefined) throw new Error("Cannot fetch data from machine");
 
-    res.status(200).json({
-      result
-    });
+    res.status(200).json(result);
 
   } catch (error) {
     if (error instanceof Error) {
@@ -255,9 +251,7 @@ router.get('/machines', async (_req: Request, res: Response) => {
       brand: "Samsung",
       model: "WF10000",
     }))
-    res.status(200).json({ 
-      response
-    });
+    res.status(200).json(response);
   } catch (error) {
     res.status(500).json({ message: `${error}` })
   }
@@ -291,9 +285,7 @@ router.post('/machines/:id/start', checkToken, async (req: Request, res: Respons
       default: null
     }
 
-    res.status(200).json({
-      result,
-    })
+    res.status(200).json(result)
 
   } catch (error) {
     if (error instanceof Error) {
