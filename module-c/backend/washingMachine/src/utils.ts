@@ -108,7 +108,6 @@ export function timeout(duration: number | undefined, action?: "resume" | "remai
     const now = Date.now()
     const elapsed = now - startTime
     remainingTime = Math.max(totalDuration - elapsed, 0)
-    console.log({ now, startTime })
     return remainingTime
   } else if (duration === undefined && action === "resume") {
     if (getStatus() === Status.Paused && remainingTime > 0) {
