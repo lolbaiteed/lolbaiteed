@@ -16,14 +16,18 @@ db.query(`CREATE TABLE IF NOT EXISTS Users (
   PRIMARY KEY (id))`
 );
 
-db.query(`INSERT INTO Users (name, password, role)
-  VALUES 
-  ('user1', 'user1pass', 'user'),
-  ('user2', 'user2pass', 'user'),
-  ('admin', 'adminpass', 'admin')
-  ON DUPLICATE KEY UPDATE name = VALUES(name), password = VALUES(password), role = VALUES(role)
-`);  
-
+setTimeout(() => {
+  db.query(`
+    INSERT INTO Users (name, password, role)
+    SELECT * FROM (
+      SELECT 'user1' AS name, 'user1pass' AS password, 'user' AS role
+      UNION ALL
+      SELECT 'user2', 'user2pass', 'user'
+      UNION ALL
+      SELECT 'admin', 'adminpass', 'admin'
+    ) AS tmp
+    WHERE NOT EXISTS (SELECT 1 FROM Users);
+  `);
+}, 1000);
 
 module.exports = db;
-
