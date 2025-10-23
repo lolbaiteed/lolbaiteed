@@ -1,0 +1,59 @@
+@font-face {
+  font-family: 'Paris';
+  src: url(../../fonts/Paris2024/Paris2024-Variable.ttf);
+}
+
+body {
+  background-image: url('../../images/bg.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 110%;
+  background-attachment: fixed;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1vw;
+}
+
+.images {
+  display: flex;
+  flex-direction: column;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1vh;
+}
+
+button {
+  background: none;
+  background-color: rgba(255, 255, 255, 0.2);
+  font-family: 'Paris';
+  font-size: 30px;
+  display: flex;
+  padding: 2vw;
+  gap: 10px;
+  color: white;
+  border-radius: 15px;
+  border: 2px, solid, white;
+  width: 80vw;
+}
+
+.logo {
+  scale: 0.8;
+}
+
+.frame {
+  scale: 0.8;
+}
+
+a {
+  text-decoration: none;
+  color: white;
+  cursor: default;
+}
