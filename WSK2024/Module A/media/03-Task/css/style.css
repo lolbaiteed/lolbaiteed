@@ -1,0 +1,97 @@
+/* Work here */
+.container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-areas: 
+   "A A A"
+   "B B E"
+   "S S E";
+  grid-template-rows: repeat(6, 1fr);
+  height: 30vh;
+  gap: 10px;
+}
+
+.A {
+  grid-area: A;
+  text-align: center;
+  border: 1px, solid;
+  grid-row: 1 / 3;
+}
+
+.B {
+  grid-area: B;
+  text-align: center;
+  border: 1px, solid;
+  grid-row: 3 / 5;
+}
+
+.E {
+  grid-area: E;
+  text-align: center;
+  border: 1px, solid;
+  grid-row: 3 / 7;
+}
+
+.subgrid {
+  grid-area: S;
+  display: grid;
+  grid-template-areas: 
+  "C D";
+  grid-row: 5 / 7;
+  gap: 10px;
+}
+
+.C {
+  text-align: center;
+  border: 1px, solid;
+}
+
+.D {
+  text-align: center;
+  border: 1px, solid;
+}
+
+@media(max-width: 768px) {
+  .container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-areas: 
+     "A A"
+     "B B"
+     "S S"
+     "E E";
+    grid-template-rows: repeat(6, 1fr);
+    height: 30vh;
+    gap: 10px;
+  }
+
+  .A {
+    grid-area: A;
+    text-align: center;
+    border: 1px, solid;
+    grid-row: 1 / 2;
+  }
+
+  .B {
+    grid-area: B;
+    text-align: center;
+    border: 1px, solid;
+    grid-row: 2 / 4;
+  }
+
+  .subgrid {
+    grid-area: S;
+    display: grid;
+    grid-template-areas: 
+    "C D";
+    grid-row: 4 / 5;
+    gap: 10px;
+  }
+
+  .E {
+    grid-area: E;
+    text-align: center;
+    border: 1px, solid;
+    grid-row: 5 / 6;
+  }
+}

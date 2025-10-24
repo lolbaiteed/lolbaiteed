@@ -1,0 +1,440 @@
+@font-face {
+  src: url('../../05-fonts/Paris2024/Paris2024-Variable.ttf');
+  font-family: 'Paris2024';
+}
+
+@font-face {
+  src: url('../../05-fonts/Poppins/Poppins-Thin.ttf');
+  font-family: 'PoppinsThin';
+}
+
+@font-face {
+  src: url('../../05-fonts/Poppins/Poppins-Regular.ttf');
+  font-family: 'Poppins';
+}
+
+body {
+  display: flex;
+  justify-content: center;
+}
+
+.navbar {
+  display: flex;
+  justify-content: center;
+  gap: 20vw;
+}
+
+.navbarItems {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  font-family: 'Paris2024';
+  width: 60vw;
+}
+
+.navbarItem {
+  border-left: 3px;
+  border-left-color: #002395;
+  border-left-style: solid;
+  transform: skewX(-30deg);
+  padding-inline: 2vw;
+}
+
+.navbarItem p {
+  transform: skewX(30deg);
+}
+
+.navbarItem:last-child {
+  border-inline: 3px;
+  border-inline-style: solid;
+  border-inline-color: #002395;
+}
+
+.hero {
+  background-image: url('../../03-images/hero-lg.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  padding-bottom: 10vh;
+  margin-bottom: 10vh;
+}
+
+.hero .logoWhite {
+  margin-right: 2vw;
+}
+
+.hero .divider {
+  position: absolute;
+  bottom: -11vh;
+  right: 1px;
+  width: 0;
+  height: 0;
+  border-left: 98vw solid transparent;
+  border-bottom: 60px solid white;
+  margin-bottom: 1vw;
+}
+
+.mascot {
+  position: absolute;
+  bottom: -5vh;
+  left: 2vw;
+}
+
+.heroText {
+  margin-right: 2vw;
+  font-family: 'Paris2024';
+  color: white;
+  font-size: 30px;
+  text-align: end;
+
+}
+
+.title {
+  text-align: center;
+  font-size: 30px;
+  font-family: 'Paris2024';
+  margin: 0;
+  position: relative;
+  background-image: linear-gradient(to right, #ED2939, #ED2939, #002395, #002395);
+  color: transparent;
+  background-clip: text;
+}
+
+#CountDownLine {
+  position: absolute;
+  top: 7vh;
+  left: 37vw;
+}
+
+.countDown {
+  font-family: 'Paris2024';
+  text-align: center;
+  margin-bottom: 10vh;
+  padding-bottom: 10vh;
+}
+
+.timer .desc {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 5vw;
+}
+
+.timer .time {
+  font-size: 100px;
+  letter-spacing: 2px;
+}
+
+.timerSection {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  margin-left: 25vw;
+  gap: 5vw;
+}
+
+.RoadToParis {
+  position: relative;
+  background-color: #D5E2F0;
+  margin-bottom: 15vh;
+  padding-bottom: 15vh;
+}
+
+.RoadToParis .divider {
+  position: absolute;
+  top: -60px;
+  right: 1px;
+  width: 0;
+  height: 0;
+  border-left: 98vw solid transparent;
+  border-bottom: 60px solid #D5E2F0;
+  margin-bottom: 1vw;
+}
+
+#RoadToParisLine {
+  position: absolute;
+  top: 7vh;
+  right: 35vw;
+}
+
+.RoadToParis .cards {
+  display: flex;
+  flex-direction: row;
+  gap: 1vw;
+  justify-content: center;
+}
+
+.RoadToParis .cards .cardItem {
+  font-family: 'Paris2024';
+  font-size: 12px;
+  background-color: white;
+}
+
+.RoadToParis .cards .cardItem p {
+  font-family: 'Poppins';
+  font-size: 12px;
+  margin-left: 10px;
+}
+
+.AboutTheGames {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10vh;
+  margin-bottom: 10vh;
+  padding-bottom: 10vh
+}
+
+.AboutTheGames .divider {
+  position: absolute;
+  top: -21vh;
+  right: -1px;
+  width: 0;
+  height: 0;
+  border-left: 98vw solid transparent;
+  border-bottom: 60px solid white;
+  margin-bottom: 1vw;
+}
+
+#AboutTheGamesLine {
+  position: absolute;
+  top: 11vh;
+  left: -5vw;
+}
+
+.AboutTheGames .cards {
+  display: flex;
+  flex-direction: row;
+  gap: 1vw;
+  justify-content: center;
+}
+
+.AboutTheGames .cards .cardItem .cardTitle {
+  font-family: 'Paris2024';
+  font-size: 12px;
+  background-color: red;
+  color: white;
+  padding-block: 1px;
+  margin: 0;
+}
+
+.AboutTheGames .cards .cardItem .cardDesc {
+  background-color: #D5E2F0;
+  padding-block: 1px;
+  margin: 0;
+}
+
+.Shop {
+  position: relative;
+  background-color: #D5E2F0;
+  margin-bottom: 15vh;
+  padding-bottom: 15vh;
+}
+
+.Shop p {
+  text-align: end;
+  margin-right: 17vw;
+  text-decoration: underline;
+  font-family: 'Poppins';
+}
+
+.Shop .divider {
+  position: absolute;
+  top: -60px;
+  right: 1px;
+  width: 0;
+  height: 0;
+  border-left: 98vw solid transparent;
+  border-bottom: 60px solid #D5E2F0;
+  margin-bottom: 1vw;
+}
+
+#ShopLine {
+  position: absolute;
+  top: 7vh;
+  right: 34vw;
+}
+
+.Shop .cards {
+  display: flex;
+  flex-direction: row;
+  gap: 1vw;
+  justify-content: center;
+}
+
+.Shop .cards .cardItem {
+  background-color: white;
+}
+
+.Shop .cards .cardTitle {
+  font-family: 'Paris2024';
+  font-size: 12px;
+  color: black;
+  margin: 0;
+}
+
+.Shop .cards .Prices {
+  display: flex;
+  flex-direction: row;
+  gap: 5vw;
+}
+
+.Shop .cards .Prices p{
+  font-family: 'Paris2024';
+  font-size: 25px;
+  margin: 0;
+  text-decoration: none;
+}
+
+.Shop .cards .Prices button {
+  background: none;
+  border: none;
+  background-color: black;
+  color: white;
+  font-family: 'Paris2024';
+  margin-left: 10px;
+  margin-bottom: 10px;
+  width: 5vw;
+  height: 4vh;
+}
+
+.Partners .divider {
+  position: absolute;
+  top: -21vh;
+  right: -1px;
+  width: 0;
+  height: 0;
+  border-left: 98vw solid transparent;
+  border-bottom: 60px solid white;
+  margin-bottom: 1vw;
+}
+
+.Partners {
+  position: relative;
+  margin-bottom: 10vh;
+  padding-bottom: 10vh;
+}
+
+#PartnersLine {
+  position: absolute;
+  top: 7vh;
+  left: 33vw;
+}
+
+.Partners .partnersLogo {
+  margin-top: 10vh;
+  margin-left: 12vw;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+}
+
+.footer .divider {
+  position: absolute;
+  top: 0vh;
+  right: 2vw;
+  width: 0;
+  height: 0;
+  border-right: 98vw solid transparent;
+  border-top: 60px solid white;
+  margin-bottom: 1vw;
+}
+
+.footer {
+  display: inline-block;
+  position: relative;
+  background: linear-gradient(to right, gray 50%, black 0);
+  width: 100%;
+  height: 600px;
+}
+
+.footer .top {
+  display:  flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.footer .download {
+  margin-left: 2vw;
+  margin-top:  10vh;
+  font-family: 'Poppins';
+  color: white;
+}
+
+.footer .social {
+  margin-right: 22vw;
+  color: white;
+  font-family: 'Poppins';
+  margin-top: 10vh;
+}
+
+.footer .logo {
+  width: 250px;
+}
+
+.footer .bot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: white;
+  gap: 26vh;
+  font-family: 'PoppinsThin';
+}
+
+@media (max-width: 1350px) {
+  .hero .divider {
+    position: absolute;
+    bottom: -11vh;
+    right: -15vw;
+    width: 0;
+    height: 0;
+    border-left: 120vw solid transparent;
+    border-bottom: 80px solid white;
+    margin-bottom: 1vw;
+  }
+
+  #CountDownLine {
+    position: absolute;
+    top: 7vh;
+    left: 40vw;
+  }
+
+  .timerSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 25vw;
+    gap: 5vw;
+  }
+
+  .timerSection img {
+    width: 400px;
+  }
+
+  .countDown {
+    font-family: 'Paris2024';
+    text-align: center;
+    margin-bottom: 10vh;
+    padding-bottom: 10vh;
+  }
+
+  .RoadToParis .divider {
+    position: absolute;
+    top: -7vh;
+    right: -5vw;
+    width: 0;
+    height: 0;
+    border-left: 120vw solid transparent;
+    border-bottom: 60px solid #D5E2F0;
+    margin-bottom: 1vw;
+  }
+
+  .RoadToParis .cards .cardItem:nth-child(3)  {
+    display: none;
+  }
+}
