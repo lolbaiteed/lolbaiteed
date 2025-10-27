@@ -1,0 +1,56 @@
+@font-face {
+  font-family: 'Paris';
+  src: url(../../fonts/Paris2024/Paris2024-Variable.ttf);
+}
+
+body {
+  background-image: url('../../images/bg.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 110%;
+  background-attachment: fixed;
+}
+
+.topSection {
+  display: flex;
+  margin-top: 4vw;
+  align-items: center;
+}
+
+.logo {
+  margin-left: 25%;
+}
+
+.country {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 3vw;
+  color: white;
+  font-family: 'Paris';
+}
+
+.country h1 {
+  margin: 0 
+  font-size: 50px;
+}
+
+#goldMedalsAmount {
+  font-size: 60px;
+  margin: 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+
+th, td {
+  padding: 10px;
+  text-align: center;
+  background: rgba(255,255,255,0.1);
+}
+
+

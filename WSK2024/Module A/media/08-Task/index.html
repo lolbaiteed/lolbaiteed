@@ -1,11 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>08- Task</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>08- Task</title>
 </head>
 <body>
+  <div class="container">
+    <div class="A">
+     <img src="./images/ani01.png" alt=""> 
+    </div>
+    <div class="B">
+     <img src="./images/ani02.png" alt=""> 
+    </div>
+    <div class="C">
+     <img src="./images/ani03.png" alt=""> 
+    </div>
+    <div class="D">
+     <img src="./images/ani04.png" alt=""> 
+    </div>
+    <div class="E">
+     <img src="./images/ani05.png" alt=""> 
+    </div>
+    <div class="F">
+     <img src="./images/ani06.png" alt=""> 
+    </div>
+  </div>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      display: grid;
+      max-width: 2000px;
+      gap: 15px;
+      grid-template-areas: 
+        "a a b c"
+        "a a d d"
+        "e f d d";
+      grid-template-rows: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
+      background-color: #c6d3f7;
+    }
+
+    .A {
+      grid-area: a;
+    }
+    .B {
+      grid-area: b;
+    }
+    .C {
+      grid-area: c;
+    }
+    .D {
+      grid-area: d;
+    }
+    .E {
+      grid-area: e;
+    }
+    .F {
+      grid-area: f;
+    }
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 15px;
+      border: 4px, solid, white;
+    }
     
+  </style>
 </body>
 </html>
