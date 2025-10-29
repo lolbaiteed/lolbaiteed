@@ -1,4 +1,4 @@
-import { Page, fetchData, navigate } from './cache.js'
+import { Page, fetchData, navigate } from './utils.js'
 
 
 class HomePage extends Page {

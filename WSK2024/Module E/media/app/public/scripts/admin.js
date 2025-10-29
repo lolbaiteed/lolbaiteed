@@ -1,4 +1,4 @@
-import { addToCache, navigate, fetchData, Page } from "./cache.js";
+import { addToCache, navigate, fetchData, Page } from "./utils.js";
 
 class AdminPage extends Page {
   constructor() {
