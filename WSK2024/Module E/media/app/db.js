@@ -13,6 +13,7 @@ db.query(`CREATE TABLE IF NOT EXISTS User (
   id int NOT NULL AUTO_INCREMENT,
   username varchar(191) DEFAULT NULL,
   password varchar(191) DEFAULT NULL,
+  token varchar(191) DEFAULT NULL,
   PRIMARY KEY(id))`
 );
 

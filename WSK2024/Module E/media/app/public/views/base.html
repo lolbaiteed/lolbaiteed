@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>polls</title>
+  <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+  <script>
+    globalThis.dataToTransfer = [];
+    const page = window.location.pathname === "/" ? "index" : window.location.pathname.slice(1);
+    const scriptFile = document.createElement("script");
+    scriptFile.src = `/scripts/${page}.js`;
+    document.body.appendChild(scriptFile);
+    console.log(globalThis.dataToTransfer);
+
+  </script>
+</body>
+</html>
