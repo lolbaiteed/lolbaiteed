@@ -4,10 +4,12 @@ import {hashPasswd} from './utils.js'
 export const db = mysql.createPool({
   host: 'localhost',
   port: 3306,
-  database: 'moduleedb',
   user: 'root',
+  database: 'moduleedb',
   password: 'root' 
 })
+
+db.query(`CREATE DATABASE IF NOT EXISTS moduleedb`)
 
 db.query(`CREATE TABLE IF NOT EXISTS User (
   id int NOT NULL AUTO_INCREMENT,

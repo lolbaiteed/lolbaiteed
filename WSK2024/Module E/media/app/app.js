@@ -61,6 +61,17 @@ router.post('/admin/logout',validateToken ,async(req, res) => {
   }
 })
 
+router.get('/', async (_req, res) => {
+  try {
+    const data = await db.query('SELECT * FROM Topics')
+    res.status(200).json(data)
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(422).json(error.message)
+    }
+  }
+})
+
 app.get('/', (_req, res) => {
   res.sendFile(path.join(__dirname, "public", "views", "base.html"))
 })

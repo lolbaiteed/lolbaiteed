@@ -8,13 +8,10 @@
 </head>
 <body>
   <script>
-    globalThis.dataToTransfer = [];
-    const page = window.location.pathname === "/" ? "index" : window.location.pathname.slice(1);
-    const scriptFile = document.createElement("script");
-    scriptFile.src = `/scripts/${page}.js`;
-    document.body.appendChild(scriptFile);
-    console.log(globalThis.dataToTransfer);
-
+    const cacheData = document.createElement("script");
+    cacheData.src = `/scripts/cache.js`
+    cacheData.type = 'module'
+    document.body.appendChild(cacheData);
   </script>
 </body>
 </html>
