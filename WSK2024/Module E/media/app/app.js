@@ -1,6 +1,6 @@
 import express from 'express';
 import {db, showCategory} from './db.js';
-import {verifyPasswd, generateToken, __dirname} from './utils.js'
+import {verifyPasswd, generateToken, __dirname, generateLink} from './utils.js'
 import path from 'path';
 
 const app = express();
@@ -64,7 +64,8 @@ router.post('/admin/logout',validateToken ,async(req, res) => {
 router.get('/', async (_req, res) => {
   try {
     const data = await db.query('SELECT * FROM Topics')
-    res.status(200).json(data)
+    const shortLink = generateLink();
+    res.status(200).json([data, shortLink])
   } catch (error) {
     if (error instanceof Error) {
       res.status(422).json(error.message)
@@ -72,11 +73,19 @@ router.get('/', async (_req, res) => {
   }
 })
 
+app.get('/:id', (_req, res) => {
+  res.sendFile(path.join(__dirname, "public", "views", "base.html"))
+})
+
 app.get('/', (_req, res) => {
   res.sendFile(path.join(__dirname, "public", "views", "base.html"))
 })
 
 app.get('/admin', (_req, res) => {
+  res.sendFile(path.join(__dirname, "public", "views", "base.html"))
+})
+
+app.get('/admin/create', (_req, res) => {
   res.sendFile(path.join(__dirname, "public", "views", "base.html"))
 })
 

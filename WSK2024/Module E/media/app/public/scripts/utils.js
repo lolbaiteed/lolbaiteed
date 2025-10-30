@@ -31,12 +31,12 @@ export function navigate(path) {
 
 
 export async function fetchData(method, url, data) {
-  const base = "http://localhost:3000";
+  const base = "http://localhost:3000/api";
   try {
     const res = await fetch(base + url, {
       headers: { "Content-Type": "application/json" },
       method: method,
-      body: data
+      body: data?.value 
     });
     if (!res.ok) {
       throw new Error(res.body)

@@ -19,7 +19,7 @@ class AdminPage extends Page {
 
     submit.onclick = () => {
       (async () => {
-        const response = await fetchData("POST", "/api/admin", JSON.stringify({
+        const response = await fetchData("POST", "/admin", JSON.stringify({
           username: username.value,
           password: password.value
         }));

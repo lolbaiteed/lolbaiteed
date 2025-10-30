@@ -19,5 +19,11 @@ export function generateToken() {
     return token
 }
 
+export function generateLink() {
+  const link = randomBytes(4).toString('hex');
+  return link
+}
+
+ 
 export const __filename = fileURLToPath(import.meta.url);
 export const __dirname = dirname(__filename);
