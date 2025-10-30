@@ -1,6 +1,5 @@
 import mysql from 'mysql2/promise' 
 import {hashPasswd} from './utils.js'
-import { createPool } from 'mysql2';
 
 export const db = mysql.createPool({
   host: 'localhost',
@@ -46,6 +45,14 @@ db.query(`CREATE TABLE IF NOT EXISTS Answers (
   FOREIGN KEY (questionId) REFERENCES Questions(id)
 )`)
 
+db.query(`CREATE TABLE IF NOT EXISTS ShortLinks (
+  id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  pollId int NOT NULL, 
+  code varchar(8) UNIQUE NOT NULL,
+  url varchar(191) NOT NULL,
+  FOREIGN KEY (pollId) REFERENCES Polls(id)
+)`)
+
 const username = 'admin';
 const password = hashPasswd('toor');
 
@@ -58,41 +65,6 @@ const poll1Answers = [
   ["Менее 1 часа", "1-2 часа", "3-5 часов", "Более 5 часов"],
   ["Положительно", "Нейтрально", "Отрицательно", "Не замечаю ее"]
 ]
-
-// Как часто вы заходите в социальные сети?
-//
-// Ежедневно
-// Несколько раз в неделю
-// Раз в неделю
-// Реже одного раза в неделю
-//
-// Для чего вы чаще всего используете социальные сети?
-//
-// Общение с друзьями и семьей
-// Чтение новостей
-// Развлечения
-// Работа и обучение
-//
-// Какие из социальных сетей вы используете?
-//
-// Instagram
-// Facebook
-// TikTok
-// Twitter
-//
-// Сколько времени в день вы проводите в социальных сетях?
-//
-// Менее 1 часа
-// 1-2 часа
-// 3-5 часов
-// Более 5 часов
-//
-// Как вы относитесь к рекламе в социальных сетях?
-//
-// Положительно
-// Нейтрально
-// Отрицательно
-// Не замечаю ее
 
 setTimeout(() => {
   db.query(`INSERT INTO User (username, password)
@@ -196,5 +168,9 @@ setTimeout(() => {
 
 export function showCategory() {
   return db.query(`SELECT * FROM Topics`);
+}
+
+export function showPoolId() {
+  return db.query(`SELECT id FROM Polls`)
 }
 
