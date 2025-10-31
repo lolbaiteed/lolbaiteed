@@ -1,4 +1,4 @@
-import { Page, fetchData, navigate } from './utils.js'
+import { Page, addToCache, fetchData, navigate } from './utils.js'
 
 
 class HomePage extends Page {
@@ -10,20 +10,20 @@ class HomePage extends Page {
       const container = document.createElement('div');
       const title = document.createElement('h1');
       const list = document.createElement('div');
-      const shortLinks = [];
-      console.log(response)
-      for (let i = 0; i < response[1].length; i++) {
-        (async () => {
-          shortLinks.push(await fetchData("POST", `/api/${response[1][i].id}`));
-        })
-      }
-      console.log(shortLinks);
       title.innerText = "Test";
-      response[0].forEach(element => {
+      response[0].forEach((element, index) => {
         const item = document.createElement('div');
         const button = document.createElement('button');
         button.innerText = element.name;
-        button.onclick = () => navigate(`/api/${response[1][0].id}`);
+        button.onclick = async () => {
+            try {
+              const resp = await fetchData("POST", `/${response[1][index].id}`)
+              addToCache(resp)
+              navigate("/poll")
+            } catch (error) {
+              console.log(error)              
+            }
+          } 
         button.style.background = "none";
         item.appendChild(button);
         list.appendChild(item);

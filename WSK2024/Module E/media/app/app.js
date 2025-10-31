@@ -74,7 +74,24 @@ router.get('/', async (_req, res) => {
   }
 })
 
-router.post("/:pollId", async (req, res) => {
+router.post('/:pollId', async (req, res) => {
+  const pollId = req.params.pollId; 
+  const questions = await db.query(`SELECT * FROM Questions WHERE pollId = ?`, [pollId]);
+  let answers;
+  const result = [];
+  for (let i = 0; i < questions[0].length; i++) {
+    answers = await db.query(`SELECT * FROM Answers WHERE questionId = ?`, [questions[0][i].id])
+    result.push({
+      question: questions[0][i].question_text,
+      answers: answers[0].map((item) => {
+        return item.answer_text;
+      })
+    })
+   } 
+  res.status(200).json(result);
+})
+
+router.post("/generate/:pollId", async (req, res) => {
   try {
     const shortUrl = await createShortLink(req.params.pollId);
     res.status(200).json(shortUrl);
@@ -87,13 +104,17 @@ app.get('/', (_req, res) => {
   res.sendFile(path.join(__dirname, "public", "views", "base.html"))
 })
 
-app.get('/polls/:code', async (req, res) => {
-  const [rows] = await db.query(`SELECT pollId FROM ShortLinks WHERE code = ?`, [req.params.code]);
-  if (rows.length === 0) return res.status(404).send("Link not found");
-
-  const pollId = rows[0].pollId;
-  res.redirect(`/api/${pollId}`);
+app.get('/poll', (_req, res) => {
+  res.sendFile(path.join(__dirname, "public", "views", "base.html"))
 })
+
+// app.get('/:code', async (req, res) => {
+//   const [rows] = await db.query(`SELECT pollId FROM ShortLinks WHERE code = ?`, [req.params.code]);
+//   if (rows.length === 0) return res.status(404).send("Link not found");
+//
+//   const pollId = rows[0].pollId;
+//   res.redirect(`/api/${pollId}`);
+// })
 
 app.get('/admin', (_req, res) => {
   res.sendFile(path.join(__dirname, "public", "views", "base.html"))
