@@ -16,14 +16,14 @@ class HomePage extends Page {
         const button = document.createElement('button');
         button.innerText = element.name;
         button.onclick = async () => {
-            try {
-              const resp = await fetchData("POST", `/${response[1][index].id}`)
-              addToCache(resp)
-              navigate("/poll")
-            } catch (error) {
-              console.log(error)              
-            }
-          } 
+          try {
+            const resp = await fetchData("POST", `/${response[1][index].id}`)
+            addToCache(resp)
+            navigate("/poll")
+          } catch (error) {
+            console.log(error)
+          }
+        }
         button.style.background = "none";
         item.appendChild(button);
         list.appendChild(item);
@@ -35,4 +35,3 @@ class HomePage extends Page {
 }
 
 window.currentPage = new HomePage;
-

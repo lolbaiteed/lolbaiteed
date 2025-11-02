@@ -32,16 +32,17 @@ export function navigate(path) {
 
 export async function fetchData(method, url, data) {
   const base = "http://localhost:3000/api";
+  const hasBody = data && Object.keys(data).length > 0;
   try {
     const res = await fetch(base + url, {
       headers: { "Content-Type": "application/json" },
       method: method,
-      body: data?.value 
+      ...(hasBody ? { body: JSON.stringify(data) } : {}),
     });
     if (!res.ok) {
       throw new Error(res.body)
     }
-    return res.json()
+    return await res.json()
   } catch (error) {
     if (error instanceof Error) {
       console.error(error.message)

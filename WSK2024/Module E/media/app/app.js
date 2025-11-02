@@ -1,6 +1,6 @@
 import express from 'express';
-import {db, showCategory, showPoolId} from './db.js';
-import {verifyPasswd, generateToken, __dirname, generateLink, createShortLink} from './utils.js'
+import { db, showCategory, showPoolId } from './db.js';
+import { verifyPasswd, generateToken, __dirname, createShortLink } from './utils.js'
 import path from 'path';
 
 const app = express();
@@ -14,18 +14,18 @@ async function validateToken(req, _res, next) {
   const authHeader = req.headers['authorization'];
   if (!authHeader.startsWith("Bearer ")) {
     throw new Error("Not valid token");
-  } 
+  }
   req.token = authHeader.split(" ")[1];
   next();
 }
 
 async function adminLogin(req, res, next) {
-  const {username, password} = req.body;
+  const { username, password } = req.body;
   try {
     const [rows] = await db.query(`SELECT password FROM User WHERE username = ?`, [username]);
-    const storedPassword = rows[0].password; 
+    const storedPassword = rows[0].password;
     const passMatch = verifyPasswd(password, storedPassword)
-    if(!passMatch) {
+    if (!passMatch) {
       throw new Error("Invalid password");
     }
     const token = generateToken();
@@ -34,7 +34,7 @@ async function adminLogin(req, res, next) {
     res.set('Token', token)
     next();
   } catch (error) {
-    if(error instanceof Error) {
+    if (error instanceof Error) {
       res.status(401).json(error.message);
     }
   }
@@ -49,13 +49,13 @@ router.post('/admin', adminLogin, async (_req, res) => {
   }
 })
 
-router.post('/admin/logout',validateToken ,async(req, res) => {
+router.post('/admin/logout', validateToken, async (req, res) => {
   const token = req.token;
   try {
     await db.query('UPDATE User SET token = NULL WHERE token = ?', [token])
     res.status(200).json({ message: "logged out" })
   } catch (error) {
-    if(error instanceof Error){
+    if (error instanceof Error) {
       res.status(400).json(error.message)
     }
   }
@@ -63,8 +63,8 @@ router.post('/admin/logout',validateToken ,async(req, res) => {
 
 router.get('/', async (_req, res) => {
   try {
-    const topics = await showCategory() 
-    const pollIds = await showPoolId() 
+    const topics = await showCategory()
+    const pollIds = await showPoolId()
     console.log(pollIds)
     res.status(200).json([topics[0], pollIds[0]])
   } catch (error) {
@@ -75,7 +75,7 @@ router.get('/', async (_req, res) => {
 })
 
 router.post('/:pollId', async (req, res) => {
-  const pollId = req.params.pollId; 
+  const pollId = req.params.pollId;
   const questions = await db.query(`SELECT * FROM Questions WHERE pollId = ?`, [pollId]);
   let answers;
   const result = [];
@@ -87,7 +87,7 @@ router.post('/:pollId', async (req, res) => {
         return item.answer_text;
       })
     })
-   } 
+  }
   res.status(200).json(result);
 })
 
