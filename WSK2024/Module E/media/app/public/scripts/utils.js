@@ -74,6 +74,12 @@ export class Page {
   }
 }
 
+export function setStatus(status) {
+  const url = new URL(window.location);
+  url.searchParams.set("status", status);
+  history.pushState({}, "", url);
+}
+
 window.addEventListener('popstate', () => loadScript(window.location.pathname))
 
 loadScript(window.location.pathname)

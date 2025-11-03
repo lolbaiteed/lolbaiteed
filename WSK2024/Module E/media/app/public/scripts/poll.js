@@ -1,15 +1,29 @@
-import { fetchData, Page } from "./utils.js";
+import { fetchData, setStatus, Page } from "./utils.js";
 
 const cache = window.cacheData;
 let data;
 
 if (cache.length > 1) {
   data = cache[1].data
-  console.log(cache[1].data)
 } else {
   data = cache
-  console.log(cache)
 }
+
+
+class PollPageSent extends Page {
+  constructor() {
+    super();
+
+    const container = document.createElement('div');
+    const title = document.createElement('h1');
+    const mainText = document.createElement('p');
+    title.innerText = "Thanks for copletion!"
+    mainText.innerText = "Your answers has been sent"
+    container.append(title, mainText);
+    this.load(container)
+  }
+}
+
 
 class PollPage extends Page {
   constructor() {
@@ -19,7 +33,6 @@ class PollPage extends Page {
     const submit = document.createElement('button');
     submit.type = 'submit';
     submit.innerText = 'submit';
-
     for (let i = 0; i < data[0].length; i++) {
       const questionBlock = document.createElement('div')
       const title = document.createElement('h3');
@@ -41,6 +54,8 @@ class PollPage extends Page {
 
     form.appendChild(submit);
 
+    this.load(form);
+
     submit.addEventListener('click', (event) => {
       event.preventDefault();
       const formData = new FormData(form);
@@ -48,16 +63,25 @@ class PollPage extends Page {
       for (const [name, value] of formData.entries()) {
         answers[name] = value;
       }
-      const data = [{ 'answers': answers }, { 'User-Agent': navigator.userAgent }, { 'submitedAt': new Date().toISOString() }, { 'pollId': window.location.href.split("/").pop() }]
+      const data = [{ 'answers': answers }, { 'User-Agent': navigator.userAgent }, { 'submitedAt': new Date().toISOString() }, { 'pollId': window.location.pathname.split("/").filter(Boolean).pop() }]
       console.log(data);
       (async () => {
         const resp = await fetchData("POST", "/poll/submit", data)
         console.log(resp)
+        setStatus("sent")
+        this.unload()
+        window.currentPage = new PollPageSent
       })();
     })
-
-    document.body.appendChild(form)
   }
 }
 
-window.currentPage = new PollPage;
+
+const params = new URLSearchParams(window.location.search);
+const status = params.get("status");
+
+if (status === "sent") {
+  window.currentPage = new PollPageSent;
+} else {
+  window.currentPage = new PollPage;
+}

@@ -19,7 +19,11 @@ async function validateToken(req, _res, next) {
   next();
 }
 
+//TODO: redirect if admin not logged in
 async function adminLogin(req, res, next) {
+  if (req.method === "GET") {
+    return res.redirect("/admin/login")
+  }
   const { username, password } = req.body;
   try {
     const [rows] = await db.query(`SELECT password FROM User WHERE username = ?`, [username]);
@@ -91,7 +95,6 @@ router.post('/:pollId', async (req, res) => {
   res.status(200).json(result);
 })
 
-
 router.post("/poll/submit", async (req, res) => {
   try {
     const data = req.body;
@@ -115,14 +118,6 @@ app.get('/poll/:id', (_req, res) => {
   res.sendFile(path.join(__dirname, "public", "views", "base.html"))
 })
 
-// app.get('/:code', async (req, res) => {
-//   const [rows] = await db.query(`SELECT pollId FROM ShortLinks WHERE code = ?`, [req.params.code]);
-//   if (rows.length === 0) return res.status(404).send("Link not found");
-//
-//   const pollId = rows[0].pollId;
-//   res.redirect(`/api/${pollId}`);
-// })
-//
 app.get('/admin/login', (_req, res) => {
   res.sendFile(path.join(__dirname, "public", "views", "base.html"))
 })

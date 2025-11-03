@@ -21,7 +21,7 @@ class HomePage extends Page {
             const resp = await fetchData("POST", `/${response.data[1][index].id}`)
             console.log(resp.data)
             addToCache(resp.data)
-            navigate(`/poll/${response.data[1][index].id}`)
+            navigate(`/poll/${response.data[1][index].id}?status=inProgress`)
           } catch (error) {
             console.log(error)
           }
