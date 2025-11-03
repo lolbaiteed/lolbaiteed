@@ -16,7 +16,8 @@ export function loadScript(path) {
   const oldScript = document.getElementById('pageScript');
   if (oldScript) oldScript.remove();
 
-  const page = window.location.pathname === "/" ? "index" : path.slice(1);
+  const page = window.location.pathname === "/" ? "index" : path.includes("poll") ? "poll" : path.includes("admin") ? "admin" : path.slice(1);
+
   const scriptFile = document.createElement("script");
   scriptFile.src = `/scripts/${page}.js`;
   scriptFile.id = 'pageScript';
@@ -30,19 +31,24 @@ export function navigate(path) {
 }
 
 
-export async function fetchData(method, url, data) {
+export async function fetchData(method, url, data, getHeader, sendHeader) {
   const base = "http://localhost:3000/api";
-  const hasBody = data && Object.keys(data).length > 0;
   try {
     const res = await fetch(base + url, {
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...sendHeader
+      },
       method: method,
-      ...(hasBody ? { body: JSON.stringify(data) } : {}),
+      body: JSON.stringify(data)
     });
     if (!res.ok) {
-      throw new Error(res.body)
+      throw new Error(res.text())
     }
-    return await res.json()
+
+    const json = await res.json();
+    const headerVal = getHeader ? res.headers.get(getHeader) : null;
+    return { data: json, header: headerVal }
   } catch (error) {
     if (error instanceof Error) {
       console.error(error.message)

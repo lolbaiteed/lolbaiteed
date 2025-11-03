@@ -1,12 +1,12 @@
-import mysql from 'mysql2/promise' 
-import {hashPasswd} from './utils.js'
+import mysql from 'mysql2/promise'
+import { hashPasswd } from './utils.js'
 
 export const db = mysql.createPool({
   host: 'localhost',
   port: 3306,
   user: 'root',
   database: 'moduleedb',
-  password: 'root' 
+  password: 'root'
 })
 
 db.query(`CREATE DATABASE IF NOT EXISTS moduleedb`)
@@ -50,6 +50,14 @@ db.query(`CREATE TABLE IF NOT EXISTS ShortLinks (
   pollId int NOT NULL, 
   code varchar(8) UNIQUE NOT NULL,
   url varchar(191) NOT NULL,
+  FOREIGN KEY (pollId) REFERENCES Polls(id)
+)`)
+
+db.query(`CREATE TABLE IF NOT EXISTS Results (
+  id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  userAgent varchar(255) NOT NULL,
+  pollId int NOT NULL,
+  answers JSON,
   FOREIGN KEY (pollId) REFERENCES Polls(id)
 )`)
 

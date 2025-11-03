@@ -1,6 +1,15 @@
 import { fetchData, Page } from "./utils.js";
 
-const data = window.cacheData;
+const cache = window.cacheData;
+let data;
+
+if (cache.length > 1) {
+  data = cache[1].data
+  console.log(cache[1].data)
+} else {
+  data = cache
+  console.log(cache)
+}
 
 class PollPage extends Page {
   constructor() {
@@ -33,17 +42,17 @@ class PollPage extends Page {
     form.appendChild(submit);
 
     submit.addEventListener('click', (event) => {
+      event.preventDefault();
+      const formData = new FormData(form);
+      const answers = {};
+      for (const [name, value] of formData.entries()) {
+        answers[name] = value;
+      }
+      const data = [{ 'answers': answers }, { 'User-Agent': navigator.userAgent }, { 'submitedAt': new Date().toISOString() }, { 'pollId': window.location.href.split("/").pop() }]
+      console.log(data);
       (async () => {
-        event.preventDefault();
-
-        const formData = new FormData(form);
-
-        const answers = {};
-        for (const [name, value] of formData.entries()) {
-          answers[name] = value;
-        }
-
-        await fetchData('POST', '/submit', [answers, navigator.userAgent, new Date().toUTCString(), window.location.href]);
+        const resp = await fetchData("POST", "/poll/submit", data)
+        console.log(resp)
       })();
     })
 

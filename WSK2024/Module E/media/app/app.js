@@ -91,12 +91,19 @@ router.post('/:pollId', async (req, res) => {
   res.status(200).json(result);
 })
 
-router.post("/generate/:pollId", async (req, res) => {
+
+router.post("/poll/submit", async (req, res) => {
   try {
-    const shortUrl = await createShortLink(req.params.pollId);
-    res.status(200).json(shortUrl);
+    const data = req.body;
+    console.log(typeof data[0].answers)
+    await db.query(`INSERT INTO Results (userAgent, pollId, answers)
+    VALUES(?,?,?)`, [data[1]['User-Agent'], data[3]['pollId'], JSON.stringify(data[0].answers)])
+    res.status(200).json({ message: "submited" })
   } catch (error) {
-    res.status(400).json(error.message);
+    if (error instanceof Error) {
+      console.log(error.message, error)
+      res.status(400).json(error.message, error.stack)
+    }
   }
 })
 
@@ -104,7 +111,7 @@ app.get('/', (_req, res) => {
   res.sendFile(path.join(__dirname, "public", "views", "base.html"))
 })
 
-app.get('/poll', (_req, res) => {
+app.get('/poll/:id', (_req, res) => {
   res.sendFile(path.join(__dirname, "public", "views", "base.html"))
 })
 
@@ -115,12 +122,20 @@ app.get('/poll', (_req, res) => {
 //   const pollId = rows[0].pollId;
 //   res.redirect(`/api/${pollId}`);
 // })
+//
+app.get('/admin/login', (_req, res) => {
+  res.sendFile(path.join(__dirname, "public", "views", "base.html"))
+})
 
 app.get('/admin', (_req, res) => {
   res.sendFile(path.join(__dirname, "public", "views", "base.html"))
 })
 
 app.get('/admin/create', (_req, res) => {
+  res.sendFile(path.join(__dirname, "public", "views", "base.html"))
+})
+
+app.get('/admin/logout', (_req, res) => {
   res.sendFile(path.join(__dirname, "public", "views", "base.html"))
 })
 
