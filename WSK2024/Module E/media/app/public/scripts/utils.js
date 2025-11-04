@@ -1,10 +1,60 @@
 window.currentPage = null;
 
-export function addToCache(data) {
-  if (!Array.isArray(window.cacheData)) {
-    window.cacheData = [];
+
+export class cacheError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "CacheError"
   }
-  window.cacheData.push(data);
+}
+
+export class fetchError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "FetchError"
+  }
+}
+
+/**
+ * adds data to session storage
+ * @param {string} key - the key to store data
+ * @param {string|object} value - value or object to store
+*/
+export function addToCache(key, value) {
+  if (typeof value === "object") {
+    sessionStorage.setItem(key, JSON.stringify(value))
+  } else if (typeof value === 'string') {
+    sessionStorage.setItem(key, value)
+  }
+}
+
+/**
+ * Searches for a given key in the cache
+ * @param {string} key- The key to search for in each cache entry.
+ * @returns {object|null} The value found in the cache
+ * @throws {Error} If key not found
+ */
+export function findInCache(key) {
+  if (sessionStorage.length === 0) {
+    throw new cacheError("cache is empty")
+  }
+  const found = sessionStorage.getItem(key)
+  if (found === null) {
+    throw new cacheError("cannot find data in cache")
+  }
+  try {
+    return JSON.parse(found)
+  } catch {
+    return found
+  }
+}
+
+/**
+ * Deletes pair of key:value from cache
+ * @param {string} key - key to delete
+ */
+export function deleteFromCache(key) {
+  sessionStorage.removeItem(key)
 }
 
 export function loadScript(path) {
@@ -26,55 +76,60 @@ export function loadScript(path) {
   document.body.appendChild(scriptFile);
 
   scriptFile.onload = () => {
-    if (page.includes('admin')) {
-      console.log(page)
+    if (window.location.pathname.includes('admin')) {
+      console.log(window.currentPage)
       window.initAdminPage();
     }
   }
 }
 
 export function navigate(path) {
-  history.pushState({}, '', path);
+  history.replaceState({}, '', path);
   loadScript(path);
 }
 
-
 export async function fetchData(method, url, data, getHeader, sendHeader) {
   const base = "http://localhost:3000/api";
-  try {
-    const res = await fetch(base + url, {
-      headers: {
-        "Content-Type": "application/json",
-        ...sendHeader
-      },
-      method: method,
-      body: JSON.stringify(data),
-      redirect: 'follow'
-    });
+  const res = await fetch(base + url, {
+    headers: {
+      "Content-Type": "application/json",
+      ...sendHeader
+    },
+    method: method,
+    body: JSON.stringify(data),
+    redirect: 'follow'
+  });
 
-    console.log(res.status)
-    if (res.redirected) {
-      const pathName = new URL(res.url).pathname
-      return navigate(`${pathName}`)
-    }
-
-    if (!res.ok && res.status != 302) {
-      throw new Error(res.text())
-    }
-
-    const json = await res.json();
-    const headerVal = getHeader ? res.headers.get(getHeader) : null;
-    return { data: json, header: headerVal }
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error(error)
-    }
+  if (res.redirected) {
+    const pathName = new URL(res.url).pathname
+    return navigate(`${pathName}`)
   }
+
+  if (!res.ok && res.status != 302) {
+    throw new fetchError(res.text())
+  }
+
+  const json = await res.json();
+  const headerVal = getHeader ? res.headers.get(getHeader) : null;
+  return { data: json, header: headerVal }
 }
 
 export class Page {
   constructor() {
     this.container = null;
+    this.ready = this.init();
+  }
+
+  async init() {
+    try {
+      await this.onInit()
+    } catch (error) {
+      console.error("Error initialzing page: ", error);
+    }
+  }
+
+  async onInit() {
+
   }
 
   load(container) {

@@ -1,14 +1,6 @@
-import { fetchData, setStatus, Page } from "./utils.js";
+import { fetchData, setStatus, Page, findInCache, deleteFromCache } from "./utils.js";
 
-const cache = window.cacheData;
-let data;
-
-if (cache.length > 1) {
-  data = cache[1].data
-} else {
-  data = cache
-}
-
+const data = findInCache("questions")
 
 class PollPageSent extends Page {
   constructor() {
@@ -33,12 +25,12 @@ class PollPage extends Page {
     const submit = document.createElement('button');
     submit.type = 'submit';
     submit.innerText = 'submit';
-    for (let i = 0; i < data[0].length; i++) {
+    for (let i = 0; i < data.length; i++) {
       const questionBlock = document.createElement('div')
       const title = document.createElement('h3');
-      title.innerText = data[0][i].question;
+      title.innerText = data[i].question;
       questionBlock.appendChild(title)
-      data[0][i].answers.forEach((element, index) => {
+      data[i].answers.forEach((element, index) => {
         const answer = document.createElement('label')
         const radioBox = document.createElement('input')
         radioBox.type = 'radio';
@@ -69,6 +61,7 @@ class PollPage extends Page {
         const resp = await fetchData("POST", "/poll/submit", data)
         console.log(resp)
         setStatus("sent")
+        deleteFromCache("questions")
         this.unload()
         window.currentPage = new PollPageSent
       })();

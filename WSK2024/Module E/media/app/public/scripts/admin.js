@@ -1,4 +1,5 @@
-import { addToCache, navigate, fetchData, Page } from "./utils.js";
+import { addToCache, navigate, fetchData, Page, findInCache, deleteFromCache, cacheError, fetchError } from "./utils.js";
+
 
 class AdminLoginPage extends Page {
   constructor() {
@@ -17,16 +18,22 @@ class AdminLoginPage extends Page {
     container.append(title, username, password, submit);
     this.load(container);
 
-    submit.onclick = () => {
-      (async () => {
-        const response = await fetchData("POST", "/admin/login", {
-          username: username.value,
-          password: password.value
-        }, "token");
-        console.log(response)
+    submit.onclick = async () => {
+      const response = await fetchData("POST", "/admin", {
+        username: username.value,
+        password: password.value
+      }, "Token");
+
+      if (response === undefined) {
+        return;
+      }
+
+      if (response?.header) {
+        addToCache("token", `Bearer ${response.header}`)
+        navigate('/admin');
+      } else {
         addToCache(response);
-        navigate('/');
-      })();
+      }
     }
   }
 }
@@ -34,40 +41,43 @@ class AdminLoginPage extends Page {
 class AdminLogout extends Page {
   constructor() {
     super();
-    console.log(window.cacheData.header)
+
     const container = document.createElement('div');
     this.load(container);
 
     (async () => {
       try {
-        await fetchData("POST", "/admin/logout", undefined, undefined, window.cacheData.header)
-        navigate("/")
+        const headerFromCache = findInCache("token")
+        console.log(headerFromCache)
+        await fetchData("POST", "/admin/logout", undefined, undefined, headerFromCache);
+        deleteFromCache("token")
+        navigate("/");
       } catch (error) {
-        console.error(error)
+        if (error instanceof fetchError) {
+          console.error(error.message)
+        }
       }
     })();
   }
 }
 
 class AdminPage extends Page {
-  constructor() {
-    super();
-    const container = document.createElement('div');
-    const title = document.createElement('h1');
+  async onInit() {
+    try {
+      const headerFromCache = findInCache("token")
+      res = await fetchData("POST", "/admin", undefined, undefined, headerFromCache)
 
-    (async () => {
-      try {
-        const res = await fetchData("POST", "/admin")
-        console.log(res)
-      } catch (error) {
-        if (error instanceof Error) {
-          console.error(error.message)
+      container.append(title, test);
+      this.load(container);
+    } catch (error) {
+      if (error instanceof cacheError) {
+        if (error.message === 'cache is empty') {
+          navigate("/admin/login")
         }
+      } else if (error instanceof Error) {
+        console.log(error.message);
       }
-    })();
-    container.appendChild(title);
-    this.load(container);
-    document.body.appendChild(container);
+    }
   }
 }
 

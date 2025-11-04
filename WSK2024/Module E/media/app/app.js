@@ -22,22 +22,32 @@ async function validateToken(req, _res, next) {
 
 //TODO: redirect if admin not logged in
 async function adminLogin(req, res, next) {
-  const { username, password } = req.body;
-  if (password === undefined || username === undefined) {
-    return res.redirect("/admin/login")
-  }
+  const authHeader = req.headers['authorization'];
   try {
-    const [rows] = await db.query(`SELECT password FROM User WHERE username = ?`, [username]);
-    const storedPassword = rows[0].password;
-    const passMatch = verifyPasswd(password, storedPassword)
-    if (!passMatch) {
-      throw new Error("Invalid password");
-    }
-    const token = generateToken();
+    if (authHeader != undefined) {
+      validateToken(req, res, next)
+      const tokenFound = await db.query(`SELECT username FROM User WHERE token = ?`, [req.token])
+      if (!tokenFound) {
+        throw new Error("User with this token not found");
+      }
+      next();
+    } else {
+      const { username, password } = req.body;
+      if (password === undefined || username === undefined) {
+        return res.redirect("/admin/login")
+      }
+      const [rows] = await db.query(`SELECT password FROM User WHERE username = ?`, [username]);
+      const storedPassword = rows[0].password;
+      const passMatch = verifyPasswd(password, storedPassword)
+      if (!passMatch) {
+        throw new Error("Invalid password");
+      }
+      const token = generateToken();
 
-    await db.query(`UPDATE User SET token = ? WHERE username = ?`, [token, username])
-    res.set('Token', token)
-    next();
+      await db.query(`UPDATE User SET token = ? WHERE username = ?`, [token, username])
+      res.set('Token', token)
+      next();
+    }
   } catch (error) {
     if (error instanceof Error) {
       res.status(401).json(error.message);
@@ -45,18 +55,8 @@ async function adminLogin(req, res, next) {
   }
 }
 
-router.post("/admin/login", async (req, res) => {
-  const { username, password } = req.body;
+router.post("/admin/login", async (_req, res) => {
   try {
-    const [rows] = await db.query(`SELECT password FROM User WHERE username = ?`, [username]);
-    const storedPassword = rows[0].password;
-    const passMatch = verifyPasswd(password, storedPassword);
-    if (!passMatch) {
-      throw new Error("Invalid password");
-    }
-    const token = generateToken();
-
-    await db.query(`UPDATE User SET token = ? WHERE username = ?`, [token, username])
     res.redirect("/admin")
   } catch (error) {
     if (error instanceof Error) {
@@ -65,7 +65,7 @@ router.post("/admin/login", async (req, res) => {
   }
 })
 
-router.post('/admin', adminLogin, async (_req, res) => {
+router.post('/admin', async (_req, res) => {
   try {
     const topics = await showCategory()
     res.status(200).json(topics[0]);
@@ -74,8 +74,9 @@ router.post('/admin', adminLogin, async (_req, res) => {
   }
 })
 
-router.post('/admin/logout', validateToken, async (req, res) => {
+router.post('/admin/logout', async (req, res) => {
   const token = req.token;
+  console.log(token)
   try {
     await db.query('UPDATE User SET token = NULL WHERE token = ?', [token])
     res.status(200).json({ message: "logged out" })
