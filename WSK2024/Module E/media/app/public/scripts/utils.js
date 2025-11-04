@@ -22,7 +22,15 @@ export function loadScript(path) {
   scriptFile.src = `/scripts/${page}.js`;
   scriptFile.id = 'pageScript';
   scriptFile.type = 'module';
+
   document.body.appendChild(scriptFile);
+
+  scriptFile.onload = () => {
+    if (page.includes('admin')) {
+      console.log(page)
+      window.initAdminPage();
+    }
+  }
 }
 
 export function navigate(path) {
@@ -40,9 +48,17 @@ export async function fetchData(method, url, data, getHeader, sendHeader) {
         ...sendHeader
       },
       method: method,
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
+      redirect: 'follow'
     });
-    if (!res.ok) {
+
+    console.log(res.status)
+    if (res.redirected) {
+      const pathName = new URL(res.url).pathname
+      return navigate(`${pathName}`)
+    }
+
+    if (!res.ok && res.status != 302) {
       throw new Error(res.text())
     }
 
@@ -51,7 +67,7 @@ export async function fetchData(method, url, data, getHeader, sendHeader) {
     return { data: json, header: headerVal }
   } catch (error) {
     if (error instanceof Error) {
-      console.error(error.message)
+      console.error(error)
     }
   }
 }

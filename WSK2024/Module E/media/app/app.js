@@ -1,6 +1,6 @@
 import express from 'express';
 import { db, showCategory, showPoolId } from './db.js';
-import { verifyPasswd, generateToken, __dirname, createShortLink } from './utils.js'
+import { verifyPasswd, generateToken, __dirname } from './utils.js'
 import path from 'path';
 
 const app = express();
@@ -9,6 +9,7 @@ const router = express.Router()
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use("/api", router);
+router.use("/admin", adminLogin);
 
 async function validateToken(req, _res, next) {
   const authHeader = req.headers['authorization'];
@@ -21,10 +22,10 @@ async function validateToken(req, _res, next) {
 
 //TODO: redirect if admin not logged in
 async function adminLogin(req, res, next) {
-  if (req.method === "GET") {
+  const { username, password } = req.body;
+  if (password === undefined || username === undefined) {
     return res.redirect("/admin/login")
   }
-  const { username, password } = req.body;
   try {
     const [rows] = await db.query(`SELECT password FROM User WHERE username = ?`, [username]);
     const storedPassword = rows[0].password;
@@ -43,6 +44,26 @@ async function adminLogin(req, res, next) {
     }
   }
 }
+
+router.post("/admin/login", async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const [rows] = await db.query(`SELECT password FROM User WHERE username = ?`, [username]);
+    const storedPassword = rows[0].password;
+    const passMatch = verifyPasswd(password, storedPassword);
+    if (!passMatch) {
+      throw new Error("Invalid password");
+    }
+    const token = generateToken();
+
+    await db.query(`UPDATE User SET token = ? WHERE username = ?`, [token, username])
+    res.redirect("/admin")
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(401).json(error.message);
+    }
+  }
+})
 
 router.post('/admin', adminLogin, async (_req, res) => {
   try {
@@ -114,23 +135,11 @@ app.get('/', (_req, res) => {
   res.sendFile(path.join(__dirname, "public", "views", "base.html"))
 })
 
-app.get('/poll/:id', (_req, res) => {
+app.get('/poll{/*path}', (_req, res) => {
   res.sendFile(path.join(__dirname, "public", "views", "base.html"))
 })
 
-app.get('/admin/login', (_req, res) => {
-  res.sendFile(path.join(__dirname, "public", "views", "base.html"))
-})
-
-app.get('/admin', (_req, res) => {
-  res.sendFile(path.join(__dirname, "public", "views", "base.html"))
-})
-
-app.get('/admin/create', (_req, res) => {
-  res.sendFile(path.join(__dirname, "public", "views", "base.html"))
-})
-
-app.get('/admin/logout', (_req, res) => {
+app.get('/admin{/*path}', (_req, res) => {
   res.sendFile(path.join(__dirname, "public", "views", "base.html"))
 })
 
