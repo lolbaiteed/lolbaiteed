@@ -63,6 +63,7 @@ export function loadScript(path) {
     window.currentPage.unload();
   }
 
+
   const oldScript = document.getElementById('pageScript');
   if (oldScript) oldScript.remove();
 
@@ -123,6 +124,7 @@ export class Page {
   async init() {
     try {
       await this.onInit()
+      return true
     } catch (error) {
       console.error("Error initialzing page: ", error);
     }

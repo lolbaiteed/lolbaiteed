@@ -1,4 +1,4 @@
-import { fetchData, setStatus, Page, findInCache, deleteFromCache } from "./utils.js";
+import { fetchData, setStatus, Page, findInCache, deleteFromCache, navigate } from "./utils.js";
 
 const data = findInCache("questions")
 
@@ -9,9 +9,14 @@ class PollPageSent extends Page {
     const container = document.createElement('div');
     const title = document.createElement('h1');
     const mainText = document.createElement('p');
+    const toHomeButton = document.createElement('button');
+    toHomeButton.innerText = "Go to Home page"
+    toHomeButton.onclick = () => {
+      navigate('/')
+    }
     title.innerText = "Thanks for copletion!"
     mainText.innerText = "Your answers has been sent"
-    container.append(title, mainText);
+    container.append(title, mainText, toHomeButton);
     this.load(container)
   }
 }
@@ -25,6 +30,14 @@ class PollPage extends Page {
     const submit = document.createElement('button');
     submit.type = 'submit';
     submit.innerText = 'submit';
+
+    const css = document.createElement('link');
+    const tabTitle = document.createElement('title');
+    tabTitle.innerText = "Poll"
+    css.rel = 'stylesheet';
+    css.href = '../css/poll.css'
+    document.head.append(tabTitle, css)
+
     for (let i = 0; i < data.length; i++) {
       const questionBlock = document.createElement('div')
       const title = document.createElement('h3');

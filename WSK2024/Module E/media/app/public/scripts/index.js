@@ -10,14 +10,20 @@ class HomePage extends Page {
       const container = document.createElement('div');
       const title = document.createElement('h1');
       const list = document.createElement('div');
+      const css = document.createElement('link');
+      const tabTitle = document.createElement('title');
       title.innerText = "Test";
+      tabTitle.innerText = `${title.innerText}`
+      css.rel = 'stylesheet';
+      css.href = '../css/adminLogin.css'
+      document.head.append(tabTitle, css)
       response.data[0].forEach((element, index) => {
         const item = document.createElement('div');
         const button = document.createElement('button');
         button.innerText = element.name;
         button.onclick = async () => {
           try {
-            const resp = await fetchData("POST", `/${response.data[1][index].id}`)
+            const resp = await fetchData("POST", `/poll/${response.data[1][index].id}`)
             console.log(resp.data)
             addToCache("questions", resp.data)
             navigate(`/poll/${response.data[1][index].id}?status=inProgress`)

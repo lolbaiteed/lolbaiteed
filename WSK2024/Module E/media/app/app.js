@@ -9,10 +9,12 @@ const router = express.Router()
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use("/api", router);
-router.use("/admin", adminLogin);
 
 async function validateToken(req, _res, next) {
   const authHeader = req.headers['authorization'];
+  if (authHeader === undefined) {
+    throw new Error("token must be set")
+  }
   if (!authHeader.startsWith("Bearer ")) {
     throw new Error("Not valid token");
   }
@@ -45,7 +47,7 @@ async function adminLogin(req, res, next) {
       const token = generateToken();
 
       await db.query(`UPDATE User SET token = ? WHERE username = ?`, [token, username])
-      res.set('Token', token)
+      res.set('Authorization', `Bearer ${token}`)
       next();
     }
   } catch (error) {
@@ -55,9 +57,25 @@ async function adminLogin(req, res, next) {
   }
 }
 
-router.post("/admin/login", async (_req, res) => {
+async function checkIsAdminLoggedIn(req, res, next) {
   try {
-    res.redirect("/admin")
+    validateToken(req, res, next)
+    const isLoggedIn = await db.query(`SELECT username FROM User WHERE token = ?`, [req.token])
+    if (isLoggedIn === null | undefined) {
+      res.redirect("/admin/login")
+    } else {
+      next()
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message)
+    }
+  }
+}
+
+router.post("/admin/login", adminLogin, async (_req, res) => {
+  try {
+    res.json("logged in")
   } catch (error) {
     if (error instanceof Error) {
       res.status(401).json(error.message);
@@ -65,18 +83,19 @@ router.post("/admin/login", async (_req, res) => {
   }
 })
 
-router.post('/admin', async (_req, res) => {
+router.post('/admin', checkIsAdminLoggedIn, async (_req, res) => {
   try {
     const topics = await showCategory()
     res.status(200).json(topics[0]);
   } catch (error) {
-    res.json(error)
+    if (error instanceof Error) {
+      console.error(error.message)
+    }
   }
 })
 
-router.post('/admin/logout', async (req, res) => {
+router.post('/admin/logout', validateToken, async (req, res) => {
   const token = req.token;
-  console.log(token)
   try {
     await db.query('UPDATE User SET token = NULL WHERE token = ?', [token])
     res.status(200).json({ message: "logged out" })
@@ -100,7 +119,7 @@ router.get('/', async (_req, res) => {
   }
 })
 
-router.post('/:pollId', async (req, res) => {
+router.post('/poll/:pollId', async (req, res) => {
   const pollId = req.params.pollId;
   const questions = await db.query(`SELECT * FROM Questions WHERE pollId = ?`, [pollId]);
   let answers;
