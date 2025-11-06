@@ -1,0 +1,16 @@
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+}
+
+.userAction {
+  text-align: center;
+  display: flex;
+  flex-direction: row;
+  gap: 2vw;
+}

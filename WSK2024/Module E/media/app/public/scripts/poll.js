@@ -1,4 +1,4 @@
-import { fetchData, setStatus, Page, findInCache, deleteFromCache, navigate } from "./utils.js";
+import { fetchData, setStatus, Page, findInCache, deleteFromCache, navigate, fetchError } from "./utils.js";
 
 const data = findInCache("questions")
 
@@ -71,12 +71,18 @@ class PollPage extends Page {
       const data = [{ 'answers': answers }, { 'User-Agent': navigator.userAgent }, { 'submitedAt': new Date().toISOString() }, { 'pollId': window.location.pathname.split("/").filter(Boolean).pop() }]
       console.log(data);
       (async () => {
-        const resp = await fetchData("POST", "/poll/submit", data)
-        console.log(resp)
-        setStatus("sent")
-        deleteFromCache("questions")
-        this.unload()
-        window.currentPage = new PollPageSent
+        try {
+          const resp = await fetchData("POST", "/polls/submit", data)
+          console.log(resp.data)
+          setStatus("sent")
+          deleteFromCache("questions")
+          this.unload()
+          window.currentPage = new PollPageSent
+        } catch (error) {
+          if (error instanceof fetchError) {
+            console.error(error.message)
+          }
+        }
       })();
     })
   }

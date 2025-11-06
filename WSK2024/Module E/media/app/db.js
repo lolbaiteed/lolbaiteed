@@ -58,6 +58,7 @@ db.query(`CREATE TABLE IF NOT EXISTS Results (
   userAgent varchar(255) NOT NULL,
   pollId int NOT NULL,
   answers JSON,
+  ip varbinary(16),
   FOREIGN KEY (pollId) REFERENCES Polls(id)
 )`)
 

@@ -22,7 +22,6 @@ async function validateToken(req, _res, next) {
   next();
 }
 
-//TODO: redirect if admin not logged in
 async function adminLogin(req, res, next) {
   const authHeader = req.headers['authorization'];
   try {
@@ -59,13 +58,11 @@ async function adminLogin(req, res, next) {
 
 async function checkIsAdminLoggedIn(req, res, next) {
   try {
-    validateToken(req, res, next)
-    const isLoggedIn = await db.query(`SELECT username FROM User WHERE token = ?`, [req.token])
-    if (isLoggedIn === null | undefined) {
-      res.redirect("/admin/login")
-    } else {
-      next()
+    const [isLoggedIn] = await db.query(`SELECT username FROM User WHERE token = ?`, [req.token])
+    if (!isLoggedIn || isLoggedIn.length === 0) {
+      return res.redirect("/admin/login")
     }
+    next()
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(error.message)
@@ -83,13 +80,17 @@ router.post("/admin/login", adminLogin, async (_req, res) => {
   }
 })
 
-router.post('/admin', checkIsAdminLoggedIn, async (_req, res) => {
+router.post('/admin', validateToken, checkIsAdminLoggedIn, async (req, res) => {
   try {
-    const topics = await showCategory()
-    res.status(200).json(topics[0]);
+    const username = await db.query(`SELECT username FROM User WHERE token = ?`, [req.token])
+    console.log(username[0][0])
+    const topics = await db.query(`SELECT * FROM Topics`)
+    return res.status(200).json([topics[0], username[0]])
   } catch (error) {
     if (error instanceof Error) {
-      console.error(error.message)
+      console.error(error.stack)
+    } else {
+      console.log(error)
     }
   }
 })
@@ -110,7 +111,6 @@ router.get('/', async (_req, res) => {
   try {
     const topics = await showCategory()
     const pollIds = await showPoolId()
-    console.log(pollIds)
     res.status(200).json([topics[0], pollIds[0]])
   } catch (error) {
     if (error instanceof Error) {
@@ -136,16 +136,14 @@ router.post('/poll/:pollId', async (req, res) => {
   res.status(200).json(result);
 })
 
-router.post("/poll/submit", async (req, res) => {
+router.post("/polls/submit", async (req, res) => {
   try {
     const data = req.body;
-    console.log(typeof data[0].answers)
-    await db.query(`INSERT INTO Results (userAgent, pollId, answers)
-    VALUES(?,?,?)`, [data[1]['User-Agent'], data[3]['pollId'], JSON.stringify(data[0].answers)])
+    await db.query(`INSERT INTO Results (userAgent, pollId, answers, ip)
+    VALUES(?,?,?,INET6_ATON(?))`, [data[1]['User-Agent'], data[3].pollId, JSON.stringify(data[0].answers), req.ip])
     res.status(200).json({ message: "submited" })
   } catch (error) {
     if (error instanceof Error) {
-      console.log(error.message, error)
       res.status(400).json(error.message, error.stack)
     }
   }

@@ -69,24 +69,40 @@ class AdminLogout extends Page {
 class AdminPage extends Page {
   async onInit() {
     try {
+      const headerFromCache = findInCache("token")
+      const res = await fetchData("POST", "/admin", undefined, "User", { "Authorization": headerFromCache })
+
       const container = document.createElement('div')
       container.classList.add("container")
-      const title = document.createElement('h1')
-      const headerFromCache = findInCache("token")
-      const res = await fetchData("POST", "/admin", undefined, undefined, { "Authorization": headerFromCache })
 
-      title.innerHTML = "Admin panel"
-      title.classList.add("title")
+      const navbar = document.createElement('div')
+      navbar.classList.add("navbar")
+
       const logoutButton = document.createElement('button');
       logoutButton.innerText = "Logout"
       logoutButton.onclick = () => {
         navigate('/admin/logout')
       }
-      container.append(logoutButton, title);
+
+      const user = document.createElement('p');
+      user.innerText = res.data[1][0].username
+
+      const userAction = document.createElement("div");
+      userAction.classList.add("userAction")
+      userAction.append(user, logoutButton)
+
+      const title = document.createElement('p')
+      title.innerHTML = "Admin panel"
+      title.classList.add("title")
+
+      console.log(res)
+
+      navbar.append(title, userAction)
+      container.append(navbar);
 
       const wrapper = document.createElement('div');
       wrapper.classList.add("wrapper")
-      res.data.forEach(element => {
+      res.data[0].forEach(element => {
         const button = document.createElement('button');
         button.innerText = element.name;
         wrapper.appendChild(button)
