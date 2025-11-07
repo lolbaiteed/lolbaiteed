@@ -1,6 +1,6 @@
 import { Page, addToCache, fetchData, navigate } from './utils.js'
 
-
+//TODO: copmplete the design 
 class HomePage extends Page {
   constructor() {
     super();

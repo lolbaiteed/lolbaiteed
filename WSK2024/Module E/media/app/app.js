@@ -10,6 +10,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use("/api", router);
 
+//TODO: move this functions to middleware
 async function validateToken(req, _res, next) {
   const authHeader = req.headers['authorization'];
   if (authHeader === undefined) {
@@ -95,6 +96,45 @@ router.post('/admin', validateToken, checkIsAdminLoggedIn, async (req, res) => {
   }
 })
 
+//TODO: add a redirect to "/login" if not authorized in all "/create" paths
+router.post("/admin/topics/create", async (req, res) => {
+  const data = req.body;
+  try {
+    await db.query(`INSERT INTO Topics (name) VALUES (?)`, [data.name])
+    const topicId = await db.query(`SELECT id as last_id FROM Topics ORDER BY id DESC LIMIT 1`)
+    res.set('X-TopicId', `${topicId[0][0].last_id}`)
+    res.status(201).json({ message: "Created" })
+  } catch (error) {
+    res.status(400).json({ message: "Bad request" });
+  }
+})
+
+router.post("/admin/polls/create", async (req, res) => {
+  const topicId = req.headers['x-topicid']
+  try {
+    await db.query(`INSERT INTO Polls (topicId) VALUES (?)`, [topicId])
+    res.status(201).json({ message: "created" })
+  } catch (error) {
+    console.log(error)
+    res.status(400).json({ message: "Bad request" })
+  }
+})
+
+router.post("/admin/questions/create", async (req, res) => {
+  const data = req.body;
+  const pollId = req.headers['x-pollid']
+  try {
+    await db.query(`INSERT INTO Questions (question_text, pollId) VALUES (?,?)`, [data.name, pollId])
+    res.status(200).json({
+      data: `${data}`,
+      pollId: `${pollId}`
+    })
+  } catch (error) {
+    console.log(error)
+    res.status(400).json({ message: "Bad request" })
+  }
+})
+
 router.post('/admin/logout', validateToken, async (req, res) => {
   const token = req.token;
   try {
@@ -148,6 +188,7 @@ router.post("/polls/submit", async (req, res) => {
     }
   }
 })
+
 
 app.get('/', (_req, res) => {
   res.sendFile(path.join(__dirname, "public", "views", "base.html"))

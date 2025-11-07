@@ -1,3 +1,7 @@
+body {
+  background-color: #f0f0f0;
+}
+
 .container {
   display: flex;
   flex-direction: column;
@@ -6,11 +10,92 @@
 .navbar {
   display: flex;
   justify-content: space-between;
+  background-color: #275ef5;
+  height: 5vh;
+  border-radius: 15px;
+}
+
+.title {
+  margin-left: 1vw;
+  color: white;
+  font-size: 20px;
+  align-self: center;
 }
 
 .userAction {
+  padding-left: 2vw;
   text-align: center;
   display: flex;
   flex-direction: row;
   gap: 2vw;
+  background-color: #f0f0f0;
+}
+
+.userAction button {
+  width: 100px;
+  border: none;
+  background-color: #27f5be;
+  border-radius: 15px;
+}
+
+.wrapper {
+  margin-top: 2vh;
+  display: flex;
+  flex-direction: column;
+  gap: 1vh;
+  align-items: center;
+}
+
+/* .wrapper button { */
+/*   border: none; */
+/*   height: 4vh; */
+/*   background-color: #27f5be; */
+/*   width: 80vw; */
+/*   border-radius: 15px; */
+/* } */
+
+
+/* .wrapper button:hover { */
+/*   scale: 110%; */
+/*   transition: ease-in-out 50ms; */
+/* } */
+
+.dropbtn {
+  background-color: #27c5f5;
+  color: white;
+  border: none;
+  width: 80vw;
+  height: 5vh;
+  border-radius: 15px;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdownContent {
+  display: none;
+  position: relative;
+  min-width: 160px;
+  background-color: #f0f0f0;
+}
+
+.dropdownContent button {
+  margin-top: 1vh;
+  color: black;
+  background: none;
+  border: none;
+  align-self: center;
+  width: 25vw;
+  height: 3vh;
+  border-radius: 15px;
+}
+
+.show {
+  display: flex;
+  justify-content: space-between;
+  height: 3vh;
+  border-radius: 10px;
+  padding-inline: 1vw;
 }

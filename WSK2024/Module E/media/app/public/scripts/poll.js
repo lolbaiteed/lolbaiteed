@@ -1,5 +1,6 @@
 import { fetchData, setStatus, Page, findInCache, deleteFromCache, navigate, fetchError } from "./utils.js";
 
+//TODO: complete the design
 const data = findInCache("questions")
 
 class PollPageSent extends Page {
@@ -20,7 +21,6 @@ class PollPageSent extends Page {
     this.load(container)
   }
 }
-
 
 class PollPage extends Page {
   constructor() {
@@ -87,7 +87,6 @@ class PollPage extends Page {
     })
   }
 }
-
 
 const params = new URLSearchParams(window.location.search);
 const status = params.get("status");
