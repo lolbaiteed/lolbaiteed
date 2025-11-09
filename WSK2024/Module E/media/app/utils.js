@@ -1,4 +1,4 @@
-import {randomBytes, scryptSync, timingSafeEqual} from 'crypto';
+import { randomBytes, scryptSync, timingSafeEqual } from 'crypto';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { db } from './db.js';
@@ -16,8 +16,8 @@ export function verifyPasswd(passwd, stored) {
 }
 
 export function generateToken() {
-    const token = randomBytes(16).toString('hex');
-    return token
+  const token = randomBytes(16).toString('hex');
+  return token
 }
 
 export function generateLink() {
@@ -25,19 +25,18 @@ export function generateLink() {
   return link
 }
 
-
 export async function createShortLink(pollid) {
   let shortUrl;
   let created = false;
 
-  while(!created) {
+  while (!created) {
     const code = generateLink();
     shortUrl = "http://localhost:3000/" + code;
     console.log(pollid)
 
     try {
       await db.query(`INSERT INTO ShortLinks (pollId, code, url) VALUES (?, ?, ?)`,
-      [pollid, code, shortUrl]);
+        [pollid, code, shortUrl]);
       created = true;
     } catch (error) {
       if (error.code === "ER_DUP_ENTRY") {
@@ -50,6 +49,64 @@ export async function createShortLink(pollid) {
 
   return shortUrl;
 }
- 
+
+export class dbError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "dbError"
+  }
+}
+
+export class validationError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "validationError"
+  }
+}
+
+/**
+ *@param {Object} json - must have this structure:
+  @example 
+    {
+      "id": 1,
+      "add": {
+        "location": "User",
+        "fields": "id,username",
+        "values": "2,bob"
+      },
+    }
+    @throws {dbError}
+ */
+export async function safeInsert(json) {
+  const requestTable = json.location;
+  const data = json;
+  const tables = await db.query(`SHOW TABLES`);
+  const tableExists = tables[0].some(t => t.Tables_in_moduleedb === requestTable);
+
+  if (!tableExists)
+    throw new dbError(`table ${requestTable} is not found`);
+
+  const columns = await db.query(`SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?`, [requestTable])
+  let sqlFields = [];
+
+  data.fields.split(",").forEach(element => {
+    const columnExists = columns[0].some(c => c.COLUMN_NAME === element)
+    if (!columnExists)
+      throw new dbError(`table ${requestTable} does not have field: ${element}`);
+    sqlFields.push(element)
+  });
+
+  const valueCounter = data.fields.split(',').map(() => "?").join(",");
+  const queryBase = `INSERT INTO ${requestTable} (${sqlFields}) VALUES(${valueCounter})`
+
+  await db.query(queryBase, data.values.split(','))
+}
+
+//TODO: finish delete and add update function
+export async function safeDelete(json) {
+  const id = json.del.id;
+  const requestTable = json.del.location;
+}
+
 export const __filename = fileURLToPath(import.meta.url);
 export const __dirname = dirname(__filename);

@@ -9,8 +9,6 @@ export const db = mysql.createPool({
   password: 'root'
 })
 
-db.query(`CREATE DATABASE IF NOT EXISTS moduleedb`)
-
 db.query(`CREATE TABLE IF NOT EXISTS User (
   id int NOT NULL AUTO_INCREMENT,
   username varchar(191) DEFAULT NULL,
@@ -28,21 +26,21 @@ db.query(`CREATE TABLE IF NOT EXISTS Topics (
 db.query(`CREATE TABLE IF NOT EXISTS Polls (
   id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
   topicId int NOT NULL,
-  FOREIGN KEY (topicId) REFERENCES Topics(id)
+  FOREIGN KEY (topicId) REFERENCES Topics(id) ON DELETE CASCADE
 )`)
 
 db.query(`CREATE TABLE IF NOT EXISTS Questions (
   id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
   question_text varchar(191) NOT NULL,
   pollId int NOT NULL,
-  FOREIGN KEY (pollId) REFERENCES Polls(id)
+  FOREIGN KEY (pollId) REFERENCES Polls(id) ON DELETE CASCADE
 )`)
 
 db.query(`CREATE TABLE IF NOT EXISTS Answers (
   id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
   questionId int NOT NULL,
   answer_text varchar(191) NOT NULL,
-  FOREIGN KEY (questionId) REFERENCES Questions(id)
+  FOREIGN KEY (questionId) REFERENCES Questions(id) ON DELETE CASCADE
 )`)
 
 db.query(`CREATE TABLE IF NOT EXISTS ShortLinks (
@@ -50,7 +48,7 @@ db.query(`CREATE TABLE IF NOT EXISTS ShortLinks (
   pollId int NOT NULL, 
   code varchar(8) UNIQUE NOT NULL,
   url varchar(191) NOT NULL,
-  FOREIGN KEY (pollId) REFERENCES Polls(id)
+  FOREIGN KEY (pollId) REFERENCES Polls(id) ON DELETE CASCADE
 )`)
 
 db.query(`CREATE TABLE IF NOT EXISTS Results (
@@ -59,7 +57,7 @@ db.query(`CREATE TABLE IF NOT EXISTS Results (
   pollId int NOT NULL,
   answers JSON,
   ip varbinary(16),
-  FOREIGN KEY (pollId) REFERENCES Polls(id)
+  FOREIGN KEY (pollId) REFERENCES Polls(id) ON DELETE CASCADE
 )`)
 
 const username = 'admin';
@@ -143,8 +141,6 @@ setTimeout(() => {
       SELECT '${poll1Answers[1][1]}' as answer_text, 2 as questionId
       UNION ALL
       SELECT '${poll1Answers[1][2]}' as answer_text, 2 as questionId
-      UNION ALL
-      SELECT '${poll1Answers[1][3]}' as answer_text, 2 as questionId
       UNION ALL
       SELECT '${poll1Answers[1][3]}' as answer_text, 2 as questionId
       UNION ALL

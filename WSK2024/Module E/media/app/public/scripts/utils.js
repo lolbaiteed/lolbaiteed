@@ -1,4 +1,10 @@
+// import { fileURLToPath } from 'url';
+// import { dirname } from 'path';
+
 window.currentPage = null;
+
+// export const __filename = fileURLToPath(import.meta.url);
+// export const __dirname = dirname(__filename);
 
 
 export class cacheError extends Error {
@@ -63,7 +69,6 @@ export function loadScript(path) {
     window.currentPage.unload();
   }
 
-
   const oldScript = document.getElementById('pageScript');
   if (oldScript) oldScript.remove();
 
@@ -78,14 +83,13 @@ export function loadScript(path) {
 
   scriptFile.onload = () => {
     if (window.location.pathname.includes('admin')) {
-      console.log(window.currentPage)
       window.initAdminPage();
     }
   }
 }
 
 export function navigate(path) {
-  history.replaceState({}, '', path);
+  history.pushState({}, '', path);
   loadScript(path);
 }
 
@@ -134,13 +138,24 @@ export class Page {
 
   }
 
-  load(container) {
+  load(container, style, title) {
     this.container = container;
+    this.style = style;
+    this.title = title;
     document.body.appendChild(container);
+    document.head.append(style, title);
   }
 
   unload() {
-    if (this.container) {
+    if (this.style && this.container) {
+      this.container.remove();
+      this.style.remove();
+      if (this.title) {
+        this.title.remove();
+      }
+      this.container = null;
+      this.style = null;
+    } else if (this.container) {
       this.container.remove();
       this.container = null;
     }

@@ -36,7 +36,6 @@ class PollPage extends Page {
     tabTitle.innerText = "Poll"
     css.rel = 'stylesheet';
     css.href = '../css/poll.css'
-    document.head.append(tabTitle, css)
 
     for (let i = 0; i < data.length; i++) {
       const questionBlock = document.createElement('div')
@@ -59,7 +58,7 @@ class PollPage extends Page {
 
     form.appendChild(submit);
 
-    this.load(form);
+    this.load(form, css, tabTitle);
 
     submit.addEventListener('click', (event) => {
       event.preventDefault();
