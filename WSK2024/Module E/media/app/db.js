@@ -31,7 +31,7 @@ db.query(`CREATE TABLE IF NOT EXISTS Polls (
 
 db.query(`CREATE TABLE IF NOT EXISTS Questions (
   id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  question_text varchar(191) NOT NULL,
+  value varchar(191) NOT NULL,
   pollId int NOT NULL,
   FOREIGN KEY (pollId) REFERENCES Polls(id) ON DELETE CASCADE
 )`)
@@ -39,7 +39,7 @@ db.query(`CREATE TABLE IF NOT EXISTS Questions (
 db.query(`CREATE TABLE IF NOT EXISTS Answers (
   id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
   questionId int NOT NULL,
-  answer_text varchar(191) NOT NULL,
+  value varchar(191) NOT NULL,
   FOREIGN KEY (questionId) REFERENCES Questions(id) ON DELETE CASCADE
 )`)
 
@@ -112,61 +112,61 @@ setTimeout(() => {
     ) as tmp
     WHERE NOT EXISTS (SELECT 1 FROM Polls)`)
 
-  db.query(`INSERT INTO Questions (question_text, pollId)
+  db.query(`INSERT INTO Questions (value, pollId)
     SELECT * FROM (
-      SELECT 'Как часто вы заходите в социальные сети?' as question_text, 1 as pollId 
+      SELECT 'Как часто вы заходите в социальные сети?' as value, 1 as pollId 
       UNION ALL
       SELECT 'Для чего вы чаще всего используете социальные сети?', 1
       UNION ALL
-      SELECT 'Какие из социальных сетей вы используете?' as question_text, 1 as pollId 
+      SELECT 'Какие из социальных сетей вы используете?' as value, 1 as pollId 
       UNION ALL
-      SELECT 'Сколько времени в день вы проводите в социальных сетях?' as question_text, 1 as pollId 
+      SELECT 'Сколько времени в день вы проводите в социальных сетях?' as value, 1 as pollId 
       UNION ALL
-      SELECT 'Как вы относитесь к рекламе в социальных сетях?' as question_text, 1 as pollId 
+      SELECT 'Как вы относитесь к рекламе в социальных сетях?' as value, 1 as pollId 
     ) as tmp
     WHERE NOT EXISTS (SELECT 1 FROM Questions);`)
 
-  db.query(`INSERT INTO Answers (answer_text, questionId)
+  db.query(`INSERT INTO Answers (value, questionId)
     SELECT * FROM (
-      SELECT '${poll1Answers[0][0]}' as answer_text, 1 as questionId 
+      SELECT '${poll1Answers[0][0]}' as value, 1 as questionId 
       UNION ALL
-      SELECT '${poll1Answers[0][1]}' as answer_text, 1 as questionId 
+      SELECT '${poll1Answers[0][1]}' as value, 1 as questionId 
       UNION ALL
-      SELECT '${poll1Answers[0][2]}' as answer_text, 1 as questionId
+      SELECT '${poll1Answers[0][2]}' as value, 1 as questionId
       UNION ALL
-      SELECT '${poll1Answers[0][3]}' as answer_text, 1 as questionId
+      SELECT '${poll1Answers[0][3]}' as value, 1 as questionId
       UNION ALL
-      SELECT '${poll1Answers[1][0]}' as answer_text, 2 as questionId
+      SELECT '${poll1Answers[1][0]}' as value, 2 as questionId
       UNION ALL
-      SELECT '${poll1Answers[1][1]}' as answer_text, 2 as questionId
+      SELECT '${poll1Answers[1][1]}' as value, 2 as questionId
       UNION ALL
-      SELECT '${poll1Answers[1][2]}' as answer_text, 2 as questionId
+      SELECT '${poll1Answers[1][2]}' as value, 2 as questionId
       UNION ALL
-      SELECT '${poll1Answers[1][3]}' as answer_text, 2 as questionId
+      SELECT '${poll1Answers[1][3]}' as value, 2 as questionId
       UNION ALL
-      SELECT '${poll1Answers[2][0]}' as answer_text, 3 as questionId
+      SELECT '${poll1Answers[2][0]}' as value, 3 as questionId
       UNION ALL
-      SELECT '${poll1Answers[2][1]}' as answer_text, 3 as questionId
+      SELECT '${poll1Answers[2][1]}' as value, 3 as questionId
       UNION ALL
-      SELECT '${poll1Answers[2][2]}' as answer_text, 3 as questionId
+      SELECT '${poll1Answers[2][2]}' as value, 3 as questionId
       UNION ALL
-      SELECT '${poll1Answers[2][3]}' as answer_text, 3 as questionId
+      SELECT '${poll1Answers[2][3]}' as value, 3 as questionId
       UNION ALL
-      SELECT '${poll1Answers[3][0]}' as answer_text, 4 as questionId
+      SELECT '${poll1Answers[3][0]}' as value, 4 as questionId
       UNION ALL
-      SELECT '${poll1Answers[3][1]}' as answer_text, 4 as questionId
+      SELECT '${poll1Answers[3][1]}' as value, 4 as questionId
       UNION ALL
-      SELECT '${poll1Answers[3][2]}' as answer_text, 4 as questionId
+      SELECT '${poll1Answers[3][2]}' as value, 4 as questionId
       UNION ALL
-      SELECT '${poll1Answers[3][3]}' as answer_text, 4 as questionId
+      SELECT '${poll1Answers[3][3]}' as value, 4 as questionId
       UNION ALL
-      SELECT '${poll1Answers[4][0]}' as answer_text, 5 as questionId 
+      SELECT '${poll1Answers[4][0]}' as value, 5 as questionId 
       UNION ALL
-      SELECT '${poll1Answers[4][1]}' as answer_text, 5 as questionId
+      SELECT '${poll1Answers[4][1]}' as value, 5 as questionId
       UNION ALL
-      SELECT '${poll1Answers[4][2]}' as answer_text, 5 as questionId
+      SELECT '${poll1Answers[4][2]}' as value, 5 as questionId
       UNION ALL
-      SELECT '${poll1Answers[4][3]}' as answer_text, 5 as questionId
+      SELECT '${poll1Answers[4][3]}' as value, 5 as questionId
     ) as tmp
     WHERE NOT EXISTS (SELECT 1 FROM Answers);`)
 }, 1000);

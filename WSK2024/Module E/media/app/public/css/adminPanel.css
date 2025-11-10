@@ -3,7 +3,7 @@ body {
 }
 
 @supports (selector(.test .child)) {
-  .edit-page{
+  .edit-page {
     .wrapper {
       margin-top: 2vh;
       display: flex;
@@ -27,9 +27,9 @@ body {
 
     .answerBlock {
       display: flex;
-      justify-content: space-between; 
+      justify-content: space-between;
     }
-    
+
     .answersLeft {
       display: flex;
       flex-direction: column;
@@ -140,6 +140,10 @@ body {
   height: 3vh;
   border-radius: 10px;
   padding-inline: 1vw;
+}
+
+.open {
+  display: block;
 }
 
 .addNew {

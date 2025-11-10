@@ -111,7 +111,7 @@ export async function fetchData(method, url, data, getHeader, sendHeader) {
   }
 
   if (!res.ok && res.status != 302) {
-    throw new fetchError(res.text())
+    throw new fetchError(await res.json())
   }
 
   const json = await res.json();
@@ -148,6 +148,7 @@ export class Page {
 
   unload() {
     if (this.style && this.container) {
+      document.body.removeAttribute("class")
       this.container.remove();
       this.style.remove();
       if (this.title) {

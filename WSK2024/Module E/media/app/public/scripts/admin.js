@@ -107,6 +107,7 @@ class AdminPage extends Page {
 
       const wrapper = document.createElement('div');
       wrapper.classList.add("wrapper")
+
       res.data[0].forEach(element => {
         const dropdown = document.createElement('div');
         dropdown.classList.add("dropdown");
@@ -122,8 +123,9 @@ class AdminPage extends Page {
         button.innerText = element.name;
 
         const deleteItem = document.createElement("button");
-        deleteItem.onclick = () => {
-          navigate('/')
+        deleteItem.onclick = async () => {
+          await fetchData("POST", "/admin/topics/delete", { "id": element.id }, undefined, { "Authorization": headerFromCache })
+          navigate("/admin")
         }
         deleteItem.addEventListener('mouseenter', () => {
           deleteItem.style.backgroundColor = "#f5275e";
@@ -151,14 +153,24 @@ class AdminPage extends Page {
         wrapper.appendChild(dropdown)
       });
 
+      console.log(res.data[0].pop().id)
+      const input = document.createElement('input');
+      input.type = 'input';
+      console.log("")
+
       const createNewTopic = document.createElement('button')
       createNewTopic.innerText = "Add new topic"
       createNewTopic.classList.add("addNew")
-      createNewTopic.onclick = () => {
-        navigate("/admin/topics/create")
+      createNewTopic.onclick = async () => {
+        if (input.value === "") {
+          alert("Topic name cannot be empty");
+        } else {
+          await fetchData("POST", "/admin/topics/create", { name: input.value }, undefined, { "Authorization": headerFromCache })
+          navigate('/admin');
+        }
       }
 
-      wrapper.appendChild(createNewTopic)
+      wrapper.append(createNewTopic, input)
 
       container.appendChild(wrapper)
 
@@ -259,92 +271,156 @@ class AdminCreate extends Page {
 
 class AdminEdit extends Page {
   async onInit() {
-    const headerFromCache = findInCache("token")
-    const res = await fetchData("POST", "/admin", undefined, "User", { "Authorization": headerFromCache })
+    const headerFromCache = findInCache("token");
+    const res = await fetchData("POST", "/admin", undefined, "User", { "Authorization": headerFromCache });
 
-    document.body.classList.add("edit-page")
-    const pollId = window.location.href.split("/")[5]
+    document.body.classList.add("edit-page");
+    const pollId = Number(window.location.href.split("/")[5]); // numeric ID
+
+    const changes = { id: pollId };
 
     const container = document.createElement('div');
     container.classList.add("container");
 
-    const navbar = document.createElement('div')
-    navbar.classList.add("navbar")
+    const navbar = document.createElement('div');
+    navbar.classList.add("navbar");
 
     const logoutButton = document.createElement('button');
-    logoutButton.innerText = "Logout"
-    logoutButton.onclick = () => {
-      navigate('/admin/logout')
-    }
+    logoutButton.innerText = "Logout";
+    logoutButton.onclick = () => navigate('/admin/logout');
 
     const user = document.createElement('p');
-    user.innerText = res.data[1][0].username
+    user.innerText = res.data[1][0].username;
 
     const userAction = document.createElement("div");
-    userAction.classList.add("userAction")
-    userAction.append(user, logoutButton)
+    userAction.classList.add("userAction");
+    userAction.append(user, logoutButton);
 
-    const title = document.createElement('p')
-    title.innerHTML = "Admin panel"
-    title.classList.add("title")
+    const title = document.createElement('p');
+    title.innerHTML = "Admin panel";
+    title.classList.add("title");
 
-    navbar.append(title, userAction)
+    navbar.append(title, userAction);
     container.append(navbar);
 
     const wrapper = document.createElement('div');
-    wrapper.classList.add("wrapper")
+    wrapper.classList.add("wrapper");
 
     try {
-      const pollData = await fetchData("POST", `/poll/${pollId}`)
+      const pollData = await fetchData("POST", `/poll/${pollId}`);
 
-      for (let i = 0; i < pollData.data.length; i++) {
+      const setChange = (type, location, id, fields, values) => {
+        changes[type] = { location, id, fields, values };
+      };
+
+      const createQuestionBlock = (questionText = "", answers = [], isNew = false, fullAnswers = []) => {
         const questionBlock = document.createElement('div');
         questionBlock.classList.add("questionBlock");
 
+        const question = document.createElement("input");
+        question.type = "text";
+        question.classList.add("question");
+        question.value = questionText;
+
+        let startValue = question.value;
+        question.addEventListener("focus", () => (startValue = question.value));
+        question.addEventListener("blur", () => {
+          const endVal = question.value.trim();
+          if (isNew && endVal !== "") {
+            setChange("add", "question", pollId, "question", endVal);
+          } else if (startValue !== endVal && endVal !== "") {
+            setChange("upd", "question", pollId, "question", endVal);
+          }
+        });
+
+        const deleteQuestionBtn = document.createElement("button");
+        deleteQuestionBtn.innerText = "Delete Question";
+        deleteQuestionBtn.onclick = () => {
+          setChange("del", "question", pollId)
+          questionBlock.remove();
+        }
+
         const answerBlock = document.createElement('div');
         answerBlock.classList.add("answerBlock");
+
         const answersLeft = document.createElement('div');
         answersLeft.classList.add("answersLeft");
 
         const answersRight = document.createElement('div');
         answersRight.classList.add("answersRight");
 
-        const question = document.createElement("input");
-        question.type = "input";
-        question.classList.add("question");
-        question.value = pollData.data[i].question;
-
-        questionBlock.append(question);
-        pollData.data[i].answers.forEach((element, index) => {
+        answers.forEach((value, index) => {
+          const answerWrapper = document.createElement('div');
+          answerWrapper.classList.add("answerWrapper");
 
           const answer = document.createElement('input');
+          answer.type = "text";
+          answer.value = value;
 
-          answer.type = "input";
-          answer.value = element;
+          const answerId = fullAnswers[index]?.id || null;
 
-          if (index % 2 === 0) {
-            answersLeft.append(answer);
-          } else {
-            answersRight.append(answer);
-          }
-        })
+          let startVal = answer.value;
+          answer.addEventListener("focus", () => (startVal = answer.value));
+          answer.addEventListener("blur", () => {
+            const endVal = answer.value.trim();
+            if (startVal !== endVal && endVal !== "") {
+              setChange("upd", "answers", answerId, "value", endVal);
+            }
+          });
+
+          const deleteBtn = document.createElement("button");
+          deleteBtn.innerText = "Delete";
+          deleteBtn.onclick = () => {
+            setChange("del", "answers", answerId);
+            answerWrapper.remove();
+          };
+
+          answerWrapper.append(answer, deleteBtn);
+
+          if (index % 2 === 0) answersLeft.append(answerWrapper);
+          else answersRight.append(answerWrapper);
+        });
+
         answerBlock.append(answersLeft, answersRight);
-        questionBlock.append(answerBlock);
-        wrapper.append(questionBlock)
+        questionBlock.append(question, deleteQuestionBtn, answerBlock);
+
+        return questionBlock;
+      };
+
+      for (let i = 0; i < pollData.data.length; i++) {
+        const q = pollData.data[i];
+        const answerValues = q.answers.map(a => a.value);
+        const block = createQuestionBlock(q.question, answerValues, false, q.answers);
+        wrapper.append(block);
       }
 
-      container.append(wrapper)
+      const addQuestionBtn = document.createElement("button");
+      addQuestionBtn.innerText = "Add Question";
+      addQuestionBtn.onclick = () => {
+        const newBlock = createQuestionBlock("", [], true);
+        wrapper.append(newBlock);
+      };
+
+
+      const submit = document.createElement("button");
+      submit.type = "submit";
+      submit.innerText = "Save Changes";
+      submit.onclick = async () => {
+        console.log("Tracked changes:", JSON.stringify(changes, null, 2));
+        await fetchData("POST", "/admin/topic/edit", changes, undefined, undefined);
+        navigate("/admin")
+      };
+
+      container.append(wrapper, addQuestionBtn, submit);
 
       const css = document.createElement('link');
-      // const tabTitle = document.createElement('title');
-      // tabTitle.innerText = `${title.innerText}`
       css.rel = 'stylesheet';
-      css.href = "/css/adminPanel.css"
+      css.href = "/css/adminPanel.css";
+      this.load(container, css);
 
-      this.load(container, css)
     } catch (error) {
       if (error instanceof fetchError) {
-        console.log(error.message)
+        console.log(error.message);
       }
     }
   }
@@ -352,8 +428,8 @@ class AdminEdit extends Page {
   constructor() {
     super();
     (async () => {
-      await this.ready
-    })()
+      await this.ready;
+    })();
   }
 }
 

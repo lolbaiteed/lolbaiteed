@@ -1,6 +1,6 @@
 import express from 'express';
 import { db, showCategory, showPoolId } from './db.js';
-import { __dirname, dbError, safeInsert } from './utils.js'
+import { __dirname, dbError, safeDelete, safeInsert, safeUpdate } from './utils.js'
 import { validateToken, adminLogin, checkIsAdminLoggedIn } from './middleware.js';
 import path from 'path';
 
@@ -47,6 +47,48 @@ router.post("/admin/topics/create", validateToken, checkIsAdminLoggedIn, async (
   }
 })
 
+router.post("/admin/topic/edit", async (req, res) => {
+  const data = req.body;
+  try {
+    for (const key in data) {
+      switch (key) {
+        case "add":
+          await safeInsert(data.add);
+          break;
+        case "upd":
+          await safeUpdate(data.upd)
+          break;
+        case "del":
+          await safeDelete(data.del);
+          break;
+      }
+    }
+    res.status(200).json({ message: "done" });
+  } catch (error) {
+    if (error instanceof dbError) {
+      res.status(400).json(error.message)
+    } else {
+      res.status(400).json(error.stack)
+    }
+  }
+})
+
+router.post("/admin/topics/delete", validateToken, checkIsAdminLoggedIn, async (req, res) => {
+  const data = req.body;
+  try {
+    const query = await db.query(`DELETE FROM Topics WHERE id = ?`, [data.id]);
+    if (query.length === 0)
+      throw new dbError(`Cannot found Topic with id: ${data.id}`)
+    res.status(200).json({ message: "done" });
+  } catch (error) {
+    if (error instanceof dbError) {
+      res.status(404).json(error.message);
+    } else {
+      res.status(400).json(error);
+    }
+  }
+})
+
 router.post("/admin/polls/create", validateToken, checkIsAdminLoggedIn, async (req, res) => {
   const topicId = req.headers['x-topicid']
   try {
@@ -83,28 +125,6 @@ router.post("/admin/answers/create", validateToken, checkIsAdminLoggedIn, async 
   }
 })
 
-//TODO: add delete and update routes
-router.post("/admin/topic/edit", async (req, res) => {
-  const data = req.body;
-  try {
-    console.log(data.id)
-    for (const key in data) {
-      switch (key) {
-        case "add":
-          await safeInsert(data.add);
-          break;
-        case "del":
-          console.log(data.del);
-          break;
-        case "upd":
-          console.log(data.upd);
-      }
-    }
-    res.status(200).json({ message: "done" });
-  } catch (error) {
-    res.status(400).json(error.message)
-  }
-})
 
 router.post('/admin/logout', validateToken, checkIsAdminLoggedIn, async (req, res) => {
   const token = req.token;
@@ -145,9 +165,12 @@ router.post('/poll/:pollId', async (req, res) => {
         throw new dbError(`Answers with questionId: ${questions[0][i].id} not found`)
       }
       result.push({
-        question: questions[0][i].question_text,
+        question: questions[0][i].value,
         answers: answers[0].map((item) => {
-          return item.answer_text;
+          return {
+            "value": item.value,
+            "id": item.id
+          }
         })
       })
     }

@@ -1,13 +1,18 @@
 {
   "id": 1,
   "add": {
-    "location": "User",
+    "location": "user",
     "fields": "id,username",
     "values": "2,bob"
   },
+  "upd": {
+    "location": "user",
+    "id": 2,
+    "fields": "username",
+    "values": "jack"
+  },
   "del": {
-    "location": "User",
+    "location": "user",
     "id": 2
-  } 
-  "upd": "dlkasjdlka"
+  }
 }
