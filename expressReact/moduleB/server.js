@@ -1,7 +1,14 @@
-require("dotenv").config();
-const express = require("express");
-const next = require("next");
-const path = require("path");
+import dotenv from 'dotenv';
+dotenv.config();
+import express from 'express';
+import next from 'next';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import authRouters from './src/server/routers/auth.js';
+import userRouters from './src/server/routers/user.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename); 
 
 const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev, dir: __dirname });
@@ -18,11 +25,8 @@ app.prepare().then(() => {
     server.set('views', path.join(__dirname, 'views'));
     server.set('view engine', 'ejs');
 
-    const authRoutes = require('./src/server/routers/auth');
-    const userRoutes = require('./src/server/routers/user');
-
-    server.use('/api/auth', authRoutes);
-    server.use('/api/users', userRoutes);
+    server.use('/api/auth', authRouters);
+    server.use('/api/users', userRouters);
 
     server.get('/admin', (req, res) => {
         const data = {title: 'Admin area', now: new Date()};

@@ -1,5 +1,3 @@
-const react = require('react');
-
 function Register() {
     return (
         <div>
@@ -8,4 +6,5 @@ function Register() {
     )
 }
 
-module.exports = Register;
+Register.layout = 'auth';
+export default Register;

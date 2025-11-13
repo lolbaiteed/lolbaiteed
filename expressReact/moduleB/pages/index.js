@@ -1,5 +1,3 @@
-const react = require('react');
-
 function Home() {
     return (
         <div>
@@ -8,4 +6,5 @@ function Home() {
     );
 }
 
-module.exports = Home;
+Home.layout = 'default';
+export default Home;

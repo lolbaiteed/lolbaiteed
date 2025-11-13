@@ -1,5 +1,3 @@
-const react = require('react');
-
 function Profile({ user }) {
     if (!user) return <div>Not logged in</div>;
     return (
@@ -10,7 +8,7 @@ function Profile({ user }) {
     );
 }
 
-async function getServerSideProps(context) {
+export async function getServerSideProps(context) {
     const cookie = context.req.headers.cookie || '';
 
     const token = cookie.split(';').map(c=>c.trim()).find(c=>c.startsWith('token='))?.split('=')[1];
@@ -27,5 +25,5 @@ async function getServerSideProps(context) {
     return { props: { user: data.user } };
 }
 
-module.exports = Profile;
-module.exports.getProps = getServerSideProps;
+Profile.layout = 'default';
+export default Profile;

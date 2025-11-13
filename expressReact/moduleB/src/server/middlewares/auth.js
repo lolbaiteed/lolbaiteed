@@ -1,8 +1,8 @@
-const jwt = require('jsonwebtoken');
-const prisma = require('../../lib/prisma');
+import jwt from 'jsonwebtoken';
+import prisma from '../../lib/prisma.js';
 const JWT_SECRET = process.env.JWT_SECRET;
 
-async function auth(req, res, next) {
+export async function auth(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ ok: false, error: "Missing token" });
@@ -19,5 +19,3 @@ async function auth(req, res, next) {
         return res.status(401).json({ ok: false, error: "Invalid token" });
     }
 }
-
-module.exports = auth;
