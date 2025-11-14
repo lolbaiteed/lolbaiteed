@@ -4,12 +4,12 @@ const router = express.Router();
 import { auth } from '../middlewares/auth.js';
 
 router.get('/me', auth, async(req, res) => {
-    res.json({ ok: true, user: req.user });
+    res.status(200).json({ user: req.user });
 });
 
 router.get('/', async (req, res) => {
     const users = await prisma.user.findMany({ select: { id: true, email: true, name: true } });
-    res.json({ ok: true, users });
+    res.status(200).json({ users });
 });
 
 export default router;

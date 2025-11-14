@@ -6,7 +6,7 @@ function AuthLayout({ children, title }) {
                     <div className="flex text-center items-center justify-center p-4 bg-red-100">
                     <h1>{title}</h1>
                     </div>
-                    <div className="flex flex-col justify-center items-center py-25 text-center">
+                    <div className="flex flex-col justify-center items-center py-10 text-center gap-5">
                         {children}
                     </div>
                 </div>

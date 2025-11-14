@@ -1,6 +1,7 @@
 import prisma from '../../lib/prisma.js'
 import jwt from 'jsonwebtoken'
 import { hashPassword, verifyPassword } from '../../lib/passHash.js';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export const register = async (req, res) => {
     try {
@@ -14,7 +15,7 @@ export const register = async (req, res) => {
         const hashed = hashPassword(password);
 
         const user = await prisma.user.create({
-            data: {email, password: hashed, name},
+            data: {email, password: hashed, name, role: "User"},
         });
 
         res.json({ message: "Created", user });
@@ -41,7 +42,7 @@ export const login = async (req, res) => {
               { expiresIn: '1d' }
             );
         res.status(200).json({ token, user });
-    } catch (err) {
-        res.status(500).json({ error: "Login failed" });
+    } catch (error) {
+        res.status(500).json({ error: "login failed" });
     }
 }

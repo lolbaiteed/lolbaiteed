@@ -6,6 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import authRouters from './src/server/routers/auth.js';
 import userRouters from './src/server/routers/user.js';
+import adminRouters from './src/server/routers/admin.js'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename); 
@@ -27,6 +28,7 @@ app.prepare().then(() => {
 
     server.use('/api/auth', authRouters);
     server.use('/api/users', userRouters);
+    server.use('/api/admin', adminRouters);
 
     server.get('/admin', (req, res) => {
         const data = {title: 'Admin area', now: new Date()};
