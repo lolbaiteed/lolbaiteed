@@ -1,3 +1,6 @@
+
+//TODO: Add styles and create a structure
+
 function Dashboard() {
     return (
         <div>

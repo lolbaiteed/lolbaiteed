@@ -1,3 +1,5 @@
+//TODO: Add styles, create structure
+
 function Profile({ user }) {
     if (!user) return <div>Not logged in</div>;
     return (

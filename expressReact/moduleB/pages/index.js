@@ -1,3 +1,4 @@
+//TODO: Add styles
 function Home() {
     return (
         <div>

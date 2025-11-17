@@ -1,7 +1,12 @@
 import express from 'express';
 import prisma from '../../lib/prisma.js';
+import { checkRole } from '../middlewares/role.js';
 import { hashPassword } from '../../lib/passHash.js';
 const router = express.Router();
+
+//TODO: Complete the dash (Delete users)
+
+router.use(checkRole);
 
 router.get("/allUsers", async (req, res) => { 
     try {
