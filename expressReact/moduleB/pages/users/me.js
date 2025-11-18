@@ -1,14 +1,35 @@
 //TODO: Add styles, create structure
 
+import axios from "axios";
+import { useRouter } from "next/navigation";
+
 function Profile({ user }) {
+
+    const logout = async () => {
+        try {
+            const router = useRouter();
+            const res = await axios.post("/api/auth/logout");
+
+            if(res.statusText === "OK") {
+                router.push("/auth/login")
+            }            
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     if (!user) return <div>Not logged in</div>;
     return (
         <div>
             <h1>Profile</h1>
             <p>{user.name} - {user.email}</p>
+            <button onClick={logout}>klajsdlkajs</button>
         </div>
     );
 }
+
+
+
 
 export async function getServerSideProps(context) {
     const cookie = context.req.headers.cookie || '';

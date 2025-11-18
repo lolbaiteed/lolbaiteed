@@ -17,7 +17,7 @@ function Login() {
             );
 
             if(response.statusText === "OK") {
-                router.push("/profile")
+                router.push("/users/me")
             }
 
             console.log("Login response: ", response);

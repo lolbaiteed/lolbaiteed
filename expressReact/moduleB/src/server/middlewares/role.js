@@ -1,7 +1,6 @@
-import prisma from "../../lib/prisma";
+import prisma from "../../lib/prisma.js";
 
 //TODO: Add user role checks
 
 export async function checkRole(req, res,next) {
-    const user 
 }

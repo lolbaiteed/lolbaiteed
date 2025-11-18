@@ -72,3 +72,18 @@ export const login = async (req, res) => {
     res.status(500).json({ error: "login failed" });
   }
 };
+
+export const logout = async (_req, res) => {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+    });
+
+    res.status(200).json({message: "Logged out"});
+  } catch (error) {
+    res.status(404).json({ error: "Cookie not set" });
+  }
+}
