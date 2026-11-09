@@ -44,6 +44,15 @@ Full-stack developer from Kazakhstan. I build web applications with Vue and Nuxt
 ## WakaTime
 
 <!--START_SECTION:waka-->
+
+```txt
+From: 02 November 2026 - To: 09 November 2026
+
+Total Time: 0 secs
+
+No activity tracked
+```
+
 <!--END_SECTION:waka-->
 
 ## Contact
